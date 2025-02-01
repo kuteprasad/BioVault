@@ -1,0 +1,29 @@
+{
+  "name": "biovault",
+  "version": "1.0.0",
+  "description": "## Overview Biometric Password Vault is a cross-platform application designed to securely store, manage, and retrieve passwords using advanced biometric authentication methods such as face, voice, and fingerprint recognition. The application aims to simplify password management while ensuring security and synchronization across devices.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd server && uvicorn main:app --reload",
+    "client": "cd client/web && npm run dev",
+    "install-server": "cd server && pip install -r requirements.txt",
+    "install-client": "cd client && npm install",
+    "install-all": "npm install && npm run install-client && npm run install-server"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kuteprasad/BioVault.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kuteprasad/BioVault/issues"
+  },
+  "homepage": "https://github.com/kuteprasad/BioVault#readme",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
