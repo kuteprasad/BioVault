@@ -1,0 +1,33 @@
+backend/
+│── main.py                    # Entry point for FastAPI application
+│── config.py                  # Configuration settings (database URL, API keys, secrets)
+│── database.py                # MongoDB connection setup using Motor
+│── models/                    # Database models (schemas for MongoDB)
+│   │── user.py                # Defines user schema (email, password, biometric data)
+│   │── vault.py               # Defines password vault schema (stored credentials)
+│   │── biometric.py           # Stores biometric data for authentication (face, voice, fingerprint)
+│   │── activity_log.py        # Stores user actions (login, password changes, failed attempts)
+│   │── settings.py            # Stores user preferences (2FA settings, notifications)
+│── routes/                    # API endpoints (FastAPI routers)
+│   │── auth.py                # User authentication (register, login, JWT handling)
+│   │── vault.py               # Password management (add, retrieve, delete passwords)
+│   │── biometric.py           # Biometric authentication endpoints
+│   │── activity_log.py        # Logs and retrieves user activity history
+│   │── settings.py            # Handles user settings & preferences
+│── services/                  # Business logic (encryption, authentication, API integrations)
+│   │── encryption.py          # AES-256 encryption for password vault
+│   │── biometric_auth.py      # WebAuthn & Google API for biometric authentication
+│   │── totp.py                # Handles 2FA (Time-Based OTP)
+│   │── cloud_storage.py       # Uploads encrypted biometric data to Cloudinary
+│── utils/                     # Helper functions
+│   │── security.py            # Password hashing (bcrypt), JWT token generation & validation
+│   │── validators.py          # Data validation (email format, strong password check)
+│── tests/                     # Unit tests for backend API
+│   │── test_auth.py           # Tests for user authentication
+│   │── test_vault.py          # Tests for password vault CRUD operations
+│   │── test_biometric.py      # Tests for biometric authentication
+│   │── test_encryption.py     # Tests for AES encryption functions
+│── .env                       # Environment variables (MongoDB URI, API keys, secrets)
+│── requirements.txt           # Python dependencies (FastAPI, Motor, Pydantic, Bcrypt, etc.)
+│── docker-compose.yml         # Docker setup for local development
+│── README.md                  # Documentation for setting up and running the backend
