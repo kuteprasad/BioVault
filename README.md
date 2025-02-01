@@ -24,30 +24,30 @@ Biometric Password Vault is a cross-platform application designed to securely st
 ## Setup Instructions
 1. **Clone the Repository**: 
    ```bash
-   git clone <repository-url>
-   cd biometric-password-vault
+   git clone https://github.com/kuteprasad/BioVault
+   cd BioVault
    ```
 
 2. **Frontend Setup**:
-   - Navigate to the `frontend/web` directory and install dependencies:
+   - Navigate to the `client/web` directory and install dependencies:
      ```bash
-     cd frontend/web
+     cd client/web
      npm install
      ```
-   - For mobile, navigate to `frontend/mobile` and install dependencies:
+   - For mobile, navigate to `client/mobile` and install dependencies:
      ```bash
-     cd frontend/mobile
+     cd client/mobile
      npm install
      ```
 
 3. **Backend Setup**:
-   - Navigate to the `backend` directory and install dependencies:
+   - Navigate to the `server` directory and install dependencies:
      ```bash
-     cd backend
+     cd server
      pip install -r requirements.txt
      ```
 
-4. **Environment Variables**: Create a `.env` file in the `backend` directory and configure your environment variables.
+4. **Environment Variables**: Create a `.env` file in the `server` directory and configure your environment variables.
 
 5. **Run the Applications**:
    - Start the backend server:
