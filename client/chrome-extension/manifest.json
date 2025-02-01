@@ -1,0 +1,39 @@
+{
+  "manifest_version": 3,
+  "name": "Biometric Password Vault",
+  "version": "1.0",
+  "description": "A Chrome extension for securely managing passwords using biometric authentication.",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "identity"
+  ],
+  "background": {
+    "service_worker": "src/background.js"
+  },
+  "action": {
+    "default_popup": "src/popup.html",
+    "default_icon": {
+      "16": "src/icons/icon16.png",
+      "48": "src/icons/icon48.png",
+      "128": "src/icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "src/icons/icon16.png",
+    "48": "src/icons/icon48.png",
+    "128": "src/icons/icon128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["src/content.js"]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["src/icons/*"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

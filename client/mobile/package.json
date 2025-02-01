@@ -1,0 +1,32 @@
+{
+  "name": "biometric-password-vault-mobile",
+  "version": "1.0.0",
+  "description": "A mobile application for securely managing passwords using biometric authentication.",
+  "main": "src/App.tsx",
+  "scripts": {
+    "start": "react-native start",
+    "android": "react-native run-android",
+    "ios": "react-native run-ios",
+    "test": "jest",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "react": "17.0.2",
+    "react-native": "0.64.2",
+    "react-navigation": "^4.4.4",
+    "axios": "^0.21.1",
+    "react-native- biometric-auth": "^1.0.0",
+    "react-native-dotenv": "^2.2.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.12.10",
+    "@babel/runtime": "^7.12.5",
+    "eslint": "^7.14.0",
+    "jest": "^26.6.0",
+    "metro-react-native-babel-preset": "^0.66.2"
+  },
+  "jest": {
+    "preset": "react-native"
+  },
+  "license": "MIT"
+}

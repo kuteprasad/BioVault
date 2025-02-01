@@ -1,0 +1,94 @@
+Database Design (MongoDB)
+1. Users Collection
+
+Stores user details and authentication data.
+
+{
+  "_id": ObjectId, 
+  "full_name": "Prasad Kute",
+  "email": "user@example.com",
+  "master_password": "hashed_password",
+  "biometric_auth": {
+    "face_id": "cloudinary_file_id",
+    "voice_id": "cloudinary_file_id",
+    "fingerprint_id": "webAuthn_credential_id"
+  },
+  "two_factor_auth": {
+    "enabled": true,
+    "method": "TOTP",
+    "secret_key": "encrypted_totp_secret"
+  },
+  "created_at": ISODate,
+  "updated_at": ISODate
+}
+2. Vault Collection
+
+Stores encrypted passwords for each user.
+
+{
+  "_id": ObjectId,
+  "user_id": ObjectId, 
+  "vault_name": "Work Accounts",
+  "passwords": [
+    {
+      "site": "https://github.com",
+      "username": "user123",
+      "password_encrypted": "AES256_encrypted_string",
+      "notes": "GitHub personal account",
+      "created_at": ISODate,
+      "updated_at": ISODate
+    }
+  ],
+  "encryption_key": "AES256_encrypted_key",
+  "created_at": ISODate,
+  "updated_at": ISODate
+}
+3. Biometric Data Collection
+
+Stores biometric authentication records securely in Cloudinary/WebAuthn.
+
+{
+  "_id": ObjectId,
+  "user_id": ObjectId,
+  "face_scan": {
+    "cloudinary_id": "cloudinary_file_id",
+    "metadata": { "resolution": "1280x720", "format": "jpeg" }
+  },
+  "voice_scan": {
+    "cloudinary_id": "cloudinary_file_id",
+    "metadata": { "length": "3s", "format": "mp3" }
+  },
+  "fingerprint_scan": {
+    "webauthn_id": "webauthn_credential_id",
+    "public_key": "base64_encoded_key"
+  },
+  "created_at": ISODate,
+  "updated_at": ISODate
+}
+4. Activity Logs Collection
+
+Stores user actions for security monitoring.
+
+{
+  "_id": ObjectId,
+  "user_id": ObjectId,
+  "action": "Login Attempt",
+  "status": "Success",
+  "ip_address": "192.168.1.1",
+  "device_info": "Chrome on Windows 10",
+  "timestamp": ISODate
+}
+5. Settings Collection
+
+Stores user preferences, including auto-fill settings.
+
+{
+  "_id": ObjectId,
+  "user_id": ObjectId,
+  "auto_fill": true,
+  "biometric_login": true,
+  "2FA_enabled": true,
+  "backup_email": "backup@example.com",
+  "created_at": ISODate,
+  "updated_at": ISODate
+}

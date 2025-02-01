@@ -1,0 +1,12 @@
+Flask
+fastapi
+uvicorn
+pydantic
+python-multipart
+passlib[bcrypt]
+python-dotenv
+motor
+web3
+requests
+pycryptodome
+```
