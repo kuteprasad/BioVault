@@ -18,7 +18,7 @@ class PyObjectId(ObjectId):
     def __modify_schema__(cls, field_schema):
         field_schema.update(type='string')
         
-# Main model for user settings, including user ID, auto-fill, biometric login, two-factor authentication enabled, backup email, and timestamps.
+# Main model for user settings
 class Settings(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     user_id: PyObjectId
