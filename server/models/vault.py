@@ -1,26 +1,10 @@
-''' 
-Stores encrypted passwords for each user.
-'''
-
+''' Stores encrypted passwords for each user.'''
 from pydantic import BaseModel, Field
 from bson import ObjectId
 from datetime import datetime
+from .py_object_id import PyObjectId
 from typing import List, Optional
 
-class PyObjectId(ObjectId):
-    @classmethod
-    def __get_validators__(cls):
-        yield cls.validate
-
-    @classmethod
-    def validate(cls, v):
-        if not ObjectId.is_valid(v):
-            raise ValueError('Invalid objectid')
-        return ObjectId(v)
-
-    @classmethod
-    def __modify_schema__(cls, field_schema):
-        field_schema.update(type='string')
 
 # Sub-model for individual password entries
 class Password(BaseModel):

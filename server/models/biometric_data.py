@@ -1,22 +1,8 @@
 from pydantic import BaseModel, Field
+from .py_object_id import PyObjectId
 from bson import ObjectId
 from datetime import datetime
 from typing import Dict
-
-class PyObjectId(ObjectId):
-    @classmethod
-    def __get_validators__(cls):
-        yield cls.validate
-
-    @classmethod
-    def validate(cls, v):
-        if not ObjectId.is_valid(v):
-            raise ValueError('Invalid objectid')
-        return ObjectId(v)
-
-    @classmethod
-    def __modify_schema__(cls, field_schema):
-        field_schema.update(type='string')
 
 # for face data
 class FaceScan(BaseModel):
