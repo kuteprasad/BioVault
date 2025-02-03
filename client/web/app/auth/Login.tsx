@@ -49,17 +49,11 @@ const Login: React.FC = () => {
 
   const handleLogin = async () => {
     try {
-      if (!formData.email || !formData.masterPassword || !formData.otp) {
-        toast.error('Please fill in all fields');
-        return;
-      }
-
-      const response = await verifyOTP(formData.email, formData.otp);
-      if (response.success) {
-        login(response.token);
-        toast.success('Login successful!');
-        navigate('/home2');
-      }
+      const response = await verifyOTP(email, otp);
+      login(response.token);
+      toast.success('Login successful!');
+      // navigate('/home2');
+      navigate('/add-biometrics');
     } catch (error) {
       toast.error('Login failed. Please check your credentials.');
     }

@@ -26,7 +26,7 @@ const initialState: AuthState = {
 };
 
 export const signupUser = createAsyncThunk(
-  'auth/signup',
+  '/signup',
   async (userData: SignupData, { rejectWithValue }) => {
     try {
       const response = await signupService(userData);
