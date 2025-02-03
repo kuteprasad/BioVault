@@ -14,5 +14,7 @@ class PyObjectId(ObjectId):
     
     # Modifies the OpenAPI schema to show ObjectId as a string.
     @classmethod
-    def __modify_schema__(cls, field_schema):
-        field_schema.update(type='string')
+    def __get_pydantic_json_schema__(cls, schema, handler):
+        schema = handler(schema)
+        schema.update(type='string')
+        return schema
