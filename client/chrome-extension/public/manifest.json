@@ -1,0 +1,27 @@
+{
+    "manifest_version": 3,
+    "name": "BioVault",
+    "version": "1.0",
+    "icons": {
+        "16": "icons/shield.png",
+        "32": "icons/shield.png",
+        "48": "icons/shield.png",
+        "128": "icons/shield.png"
+    },
+    "action": {
+        "default_popup": "index.html",
+        "default_icon": {
+            "16": "icons/shield.png",
+            "32": "icons/shield.png",
+            "48": "icons/shield.png",
+            "128": "icons/shield.png"
+        }
+    },
+    "permissions": [
+        "scripting"
+    ],
+    "host_permissions": [
+        "http://*/*",
+        "https://*/*"
+    ]
+}

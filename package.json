@@ -25,5 +25,8 @@
   "homepage": "https://github.com/kuteprasad/BioVault#readme",
   "devDependencies": {
     "concurrently": "^8.2.2"
+  },
+  "dependencies": {
+    "biovault": "file:"
   }
 }
