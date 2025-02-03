@@ -1,7 +1,0 @@
-fastapi
-uvicorn
-motor 
-pydantic
-python-dotenv
-python-jose
-passlib

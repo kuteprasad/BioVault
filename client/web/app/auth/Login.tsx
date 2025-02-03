@@ -28,7 +28,8 @@ const Login: React.FC = () => {
       const response = await verifyOTP(email, otp);
       login(response.token);
       toast.success('Login successful!');
-      navigate('/home2');
+      // navigate('/home2');
+      navigate('/add-biometrics');
     } catch (error) {
       console.error('Error verifying OTP:', error);
       toast.error('Invalid OTP. Please try again.');
