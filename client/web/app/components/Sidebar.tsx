@@ -3,8 +3,8 @@ import NavLinkComponent from "./NavLinkComponent";
 
 const Sidebar: React.FC = () => {
   return (
-    <nav className="flex flex-col items-start gap-4 p-6 bg-gray-100 dark:bg-gray-800 h-full w-64">
-      <h2 className="text-xl font-bold text-gray-800 dark:text-white ">BioVault</h2>
+    <nav className="flex flex-col items-start gap-4 p-6 bg-white/90 backdrop-blur-sm h-full w-64 shadow-lg">
+      <h2 className="text-xl font-bold text-gray-900">BioVault</h2>
       <ul className="space-y-2">
         <li>
           <NavLinkComponent to="/">View Vaults</NavLinkComponent>

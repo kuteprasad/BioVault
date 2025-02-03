@@ -1,3 +1,6 @@
+import { Provider } from 'react-redux';
+import store from './redux/store';
+
 import {
   isRouteErrorResponse,
   Links,
@@ -5,7 +8,10 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useRouteError,
 } from "react-router";
+
+import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 
 import type { Route } from "./+types/root";
 import "./app.css";
@@ -45,16 +51,19 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   return (
-  <AuthProvider>
-    <Outlet />
-  </AuthProvider>
-);
+    <Provider store={store}>
+      <AuthProvider>
+        <Outlet />
+      </AuthProvider>
+    </Provider>
+  );
 }
 
-export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
-  let message = "Oops!";
-  let details = "An unexpected error occurred.";
-  let stack: string | undefined;
+export function ErrorBoundary() {
+  const error = useRouteError();
+  let message = "Oops! Something went wrong.";
+  let details = "";
+  let stack = null;
 
   if (isRouteErrorResponse(error)) {
     message = error.status === 404 ? "404" : "Error";
@@ -68,17 +77,30 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   }
 
   return (
-    <main className="pt-16 p-4 container mx-auto text-center">
-      <h1 className="text-2xl font-bold">{message}</h1>
-      <p className="text-gray-600">{details}</p>
-      {stack && (
-        <pre className="w-full p-4 bg-gray-100 rounded-md overflow-x-auto">
-          <code>{stack}</code>
-        </pre>
-      )}
-      <a href="/" className="mt-4 inline-block text-blue-500 underline">
-        Go back to Home
-      </a>
+    <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-white p-4">
+      <div className="max-w-2xl w-full bg-white rounded-2xl shadow-lg p-8 text-center space-y-6">
+        <div className="flex justify-center">
+          <ExclamationTriangleIcon className="h-16 w-16 text-purple-500" />
+        </div>
+        
+        <h1 className="text-3xl font-bold text-gray-900">{message}</h1>
+        
+        <p className="text-lg text-gray-600">{details}</p>
+        
+        {stack && (
+          <pre className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg text-left overflow-x-auto text-sm">
+            <code className="text-gray-700">{stack}</code>
+          </pre>
+        )}
+        
+        <a
+          href="/"
+          className="mt-8 inline-flex items-center px-6 py-3 bg-purple-600 hover:bg-purple-700 
+            text-white font-medium rounded-lg transition-colors duration-200"
+        >
+          Return to Home
+        </a>
+      </div>
     </main>
   );
 }

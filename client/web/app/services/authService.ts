@@ -31,3 +31,16 @@ export const login = async (email: string, password: string) => {
     throw error;
   }
 };
+
+export const signup = async (userData: {
+  fullName: string;
+  email: string;
+  masterPassword: string;
+}) => {
+  try {
+    const response = await axios.post(`${API_URL}/signup`, userData);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
