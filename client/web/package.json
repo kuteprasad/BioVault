@@ -15,11 +15,13 @@
     "axios": "^1.7.9",
     "isbot": "^5.1.17",
     "jwt-decode": "^4.0.0",
+    "lucide-react": "^0.474.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-redux": "^9.2.0",
     "react-router": "^7.1.5",
-    "react-router-dom": "^7.1.5"
+    "react-router-dom": "^7.1.5",
+    "sonner": "^1.7.4"
   },
   "devDependencies": {
     "@react-router/dev": "^7.1.5",
