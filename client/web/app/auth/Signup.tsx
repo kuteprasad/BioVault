@@ -207,6 +207,14 @@ const Signup: React.FC = () => {
             Signup and Add Biometrics
             <ArrowRight className="h-4 w-4" />
           </button>
+          <div className="text-center">
+            <a 
+              href="/login" 
+              className="text-purple-600 hover:text-purple-700 text-sm font-medium"
+            >
+              Already have an account? Log In
+            </a>
+          </div>
         </div>
       </div>
     </div>

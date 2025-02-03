@@ -61,3 +61,6 @@ Contributions are welcome! Please submit a pull request or open an issue for any
 
 ## License
 This project is licensed under the MIT License. See the LICENSE file for more details.
+
+
+## TO run the extention , go to manage extentions in chrome and enable developer mode and load unpacked and select the folder (client\chrome-extension\dist).

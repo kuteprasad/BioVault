@@ -16,9 +16,7 @@ const FingerprintCapture: React.FC<FingerprintCaptureProps> = ({ onCapture, onEr
 
   const checkBiometricSupport = async () => {
     try {
-      // Check if PublicKeyCredential is available (WebAuthn API)
       if (window.PublicKeyCredential) {
-        // Check if platform authenticator is available
         const available = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
         setIsSupported(available);
       }
@@ -35,41 +33,56 @@ const FingerprintCapture: React.FC<FingerprintCaptureProps> = ({ onCapture, onEr
       const challenge = new Uint8Array(32);
       window.crypto.getRandomValues(challenge);
 
-      // Create publicKey credential options
-      const publicKeyCredentialCreationOptions = {
+      // Define supported algorithms
+      const supportedAlgorithms: PublicKeyCredentialParameters[] = [
+        { type: 'public-key', alg: -7 },  // ES256
+        { type: 'public-key', alg: -257 } // RS256
+      ];
+
+      // Create user identity
+      const userId = Uint8Array.from('USER_ID', c => c.charCodeAt(0));
+
+      // Create the credential options with proper types
+      const publicKeyCredentialCreationOptions: PublicKeyCredentialCreationOptions = {
         challenge,
         rp: {
           name: "Your App Name",
           id: window.location.hostname,
         },
         user: {
-          id: Uint8Array.from("USER_ID", c => c.charCodeAt(0)), // Replace with actual user ID
-          name: "user@example.com", // Replace with actual user email
-          displayName: "User Name", // Replace with actual user name
+          id: userId,
+          name: "user@example.com",
+          displayName: "User Name",
         },
-        pubKeyCredParams: [
-          { type: "public-key", alg: -7 }, // ES256
-          { type: "public-key", alg: -257 }, // RS256
-        ],
+        pubKeyCredParams: supportedAlgorithms,
         authenticatorSelection: {
-          authenticatorAttachment: "platform" as AuthenticatorAttachment,
-          userVerification: "required",
+          authenticatorAttachment: 'platform',
+          userVerification: 'required',
         },
         timeout: 60000,
-        attestation: "direct" as AttestationConveyancePreference
+        attestation: 'direct' as AttestationConveyancePreference,
       };
 
+      // Create credentials
       const credential = await navigator.credentials.create({
         publicKey: publicKeyCredentialCreationOptions
-      });
+      }) as PublicKeyCredential;
 
       if (credential) {
-        // Convert credential to blob for consistency with other biometric types
-        const credentialJson = JSON.stringify(credential);
+        // Convert the credential to a serializable format
+        const credentialData = {
+          id: credential.id,
+          type: credential.type,
+          rawId: Array.from(new Uint8Array(credential.rawId)),
+        };
+
+        // Convert to blob for consistency with other biometric types
+        const credentialJson = JSON.stringify(credentialData);
         const blob = new Blob([credentialJson], { type: 'application/json' });
         onCapture(blob);
       }
     } catch (error) {
+      console.error('Fingerprint capture error:', error);
       onError('Failed to capture fingerprint');
     } finally {
       setIsCapturing(false);
