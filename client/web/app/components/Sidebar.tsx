@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import {
   ShieldCheck,
   User,
@@ -61,18 +61,32 @@ const Sidebar: React.FC = () => {
         isOpen ? "w-48" : "w-20"
       } h-full transition-all duration-300 ease-in-out bg-white shadow-lg`}>
         {navItems.map((item) => (
-          <Link
+          <NavLink
             key={item.path}
             to={item.path}
-            className={`flex items-center ${
-              isOpen ? "px-4" : "justify-center px-2"
-            } py-4 text-gray-700 hover:bg-purple-50 transition-colors duration-200`}
+            className={({ isActive }: { isActive: boolean }) => 
+              `flex items-center 
+              ${isOpen ? "px-4" : "justify-center px-2"} 
+              py-4 
+              ${isActive 
+                ? "bg-purple-50 text-purple-700" 
+                : "text-gray-700 hover:bg-purple-50"
+              } 
+              transition-colors duration-200`
+            }
           >
-            <div className="flex-shrink-0 text-purple-600">
+            <div className={`flex-shrink-0 ${
+              ({ isActive }: { isActive: boolean }) => 
+                isActive ? "text-purple-700" : "text-purple-600"
+            }`}>
               {item.icon}
             </div>
-            {isOpen && <span className="ml-3 text-sm font-medium">{item.label}</span>}
-          </Link>
+            {isOpen && (
+              <span className="ml-3 text-sm font-medium">
+                {item.label}
+              </span>
+            )}
+          </NavLink>
         ))}
       </nav>
     </div>

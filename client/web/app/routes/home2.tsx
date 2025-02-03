@@ -24,7 +24,7 @@ export default function Home2() {
 
         {/* Main Card */}
         <div className="flex-1 flex items-center justify-center mt-6">
-          <div className="w-full max-w-5xl h-[85vh] rounded-2xl bg-white/90 backdrop-blur-md shadow-lg border border-purple-200 p-6">
+          <div className="h-auto min-h-130 w-full max-w-5xl h-[85vh] rounded-2xl bg-white/90 backdrop-blur-md shadow-lg border border-purple-200 p-6">
             <Outlet />
           </div>
         </div>

@@ -1,5 +1,6 @@
 import { Provider } from 'react-redux';
 import store from './redux/store';
+import { Toaster } from 'sonner';
 
 import {
   isRouteErrorResponse,
@@ -53,6 +54,12 @@ export default function App() {
   return (
     <Provider store={store}>
       <AuthProvider>
+      <Toaster 
+          position="top-right" 
+          expand={false} 
+          richColors 
+          closeButton
+        />
         <Outlet />
       </AuthProvider>
     </Provider>
