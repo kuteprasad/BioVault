@@ -1,3 +1,6 @@
+import { Outlet } from "react-router";
+import Sidebar from "~/components/Sidebar";
+
 export default function Home2() {
   return (
     <div className="flex h-screen gradient-background">
