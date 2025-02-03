@@ -44,3 +44,13 @@ export const signup = async (userData: {
     throw error;
   }
 };
+
+
+export const saveBiometricData = async (type: string, data: any) => {
+  try {
+    const response = await axios.post(`${API_URL}/biometrics/${type}`, data);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
