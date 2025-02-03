@@ -1,7 +1,12 @@
 from bson import ObjectId
+from pydantic import BaseModel, Field
 
-# Custom validator for MongoDB ObjectId
 class PyObjectId(ObjectId):
+    @classmethod
+    def __get_pydantic_json_schema__(cls, schema):
+        schema.update(type="string")
+        return schema
+
     @classmethod
     def __get_validators__(cls):
         yield cls.validate
@@ -9,7 +14,7 @@ class PyObjectId(ObjectId):
     @classmethod
     def validate(cls, v):
         if not ObjectId.is_valid(v):
-            raise ValueError('Invalid objectid')
+            raise ValueError(f"Invalid ObjectId: {v}")
         return ObjectId(v)
     
     # Modifies the OpenAPI schema to show ObjectId as a string.

@@ -1,8 +1,6 @@
 import motor.motor_asyncio
-from bson import ObjectId
 import os
 from dotenv import load_dotenv
-import asyncio
 
 load_dotenv()
 
@@ -11,13 +9,31 @@ MONGO_DETAILS = os.getenv("MONGO_URI")
 client =  motor.motor_asyncio.AsyncIOMotorClient(MONGO_DETAILS)
 db = client.get_database()
 
-# trying ecample
 
-user_collection = db.get_collection("users")
-# vault_collection = db.get_collection("vaults")
-# biometric_collection = db.get_collection("biometric_data")
-# activity_log_collection = db.get_collection("activity_logs")
-# settings_collection = db.get_collection("settings")
+
+
+
+
+# import motor.motor_asyncio
+# from bson import ObjectId
+# import os
+# from dotenv import load_dotenv
+# import asyncio
+
+# load_dotenv()
+
+# MONGO_DETAILS = os.getenv("MONGO_URI")
+
+# client =  motor.motor_asyncio.AsyncIOMotorClient(MONGO_DETAILS)
+# db = client.get_default_database()
+
+# # trying ecample
+
+# user_collection = db.get_collection("users")
+# # vault_collection = db.get_collection("vaults")
+# # biometric_collection = db.get_collection("biometric_data")
+# # activity_log_collection = db.get_collection("activity_logs")
+# # settings_collection = db.get_collection("settings")
 
 
 # async def check_collection_exists(collection_name: str) -> bool:

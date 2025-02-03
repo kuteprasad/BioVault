@@ -3,5 +3,5 @@ uvicorn
 motor 
 pydantic
 python-dotenv
-bson
-motor
+python-jose
+passlib
