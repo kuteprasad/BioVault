@@ -1,5 +1,4 @@
-// FaceCapture.tsx
-import React, { useRef, useState, useCallback } from 'react';
+import React, { useRef, useState, useCallback, useEffect } from 'react';
 import { Camera, StopCircle } from 'lucide-react';
 
 interface FaceCaptureProps {
@@ -7,14 +6,16 @@ interface FaceCaptureProps {
   onError: (error: string) => void;
 }
 
-export const FaceCapture: React.FC<FaceCaptureProps> = ({ onCapture, onError }) => {
-
+const FaceCapture: React.FC<FaceCaptureProps> = ({ onCapture, onError }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
   const [isCapturing, setIsCapturing] = useState(false);
+  const [capturedVideo, setCapturedVideo] = useState<string | null>(null);
 
   const stopCamera = useCallback(() => {
+    console.log('Stopping camera');
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
@@ -23,6 +24,7 @@ export const FaceCapture: React.FC<FaceCaptureProps> = ({ onCapture, onError }) 
   }, []);
 
   const initializeCamera = async () => {
+    console.log('Initializing camera');
     try {
       const constraints = {
         video: {
@@ -34,63 +36,76 @@ export const FaceCapture: React.FC<FaceCaptureProps> = ({ onCapture, onError }) 
       };
 
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      console.log('Camera stream obtained', stream);
       
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         streamRef.current = stream;
         setIsInitialized(true);
+        console.log('Video element set with stream');
       }
+      
     } catch (error) {
       console.error('Camera initialization error:', error);
       onError('Unable to access camera. Please check permissions.');
     }
   };
 
-  const captureFrame = async () => {
-    if (!videoRef.current || !streamRef.current) return;
+  const startRecording = () => {
+    if (!streamRef.current) {
+      console.log('Stream not available');
+      return;
+    }
 
-    try {
-      setIsCapturing(true);
+    const options = { mimeType: 'video/webm; codecs=vp9' };
+    const mediaRecorder = new MediaRecorder(streamRef.current, options);
+    mediaRecorderRef.current = mediaRecorder;
 
-      // Create a canvas with the video dimensions
-      const canvas = document.createElement('canvas');
-      canvas.width = videoRef.current.videoWidth;
-      canvas.height = videoRef.current.videoHeight;
-      
-      const ctx = canvas.getContext('2d');
-      if (!ctx) throw new Error('Cannot get canvas context');
+    const chunks: BlobPart[] = [];
+    mediaRecorder.ondataavailable = (event) => {
+      if (event.data.size > 0) {
+        chunks.push(event.data);
+      }
+    };
 
-      // Draw the current frame
-      ctx.drawImage(videoRef.current, 0, 0);
-
-      // Convert to blob
-      const blob = await new Promise<Blob>((resolve, reject) => {
-        canvas.toBlob(
-          (blob) => {
-            if (blob) resolve(blob);
-            else reject(new Error('Failed to create image blob'));
-          },
-          'image/jpeg',
-          0.9
-        );
-      });
-
+    mediaRecorder.onstop = () => {
+      const blob = new Blob(chunks, { type: 'video/webm' });
+      const videoURL = URL.createObjectURL(blob);
+      setCapturedVideo(videoURL);
       onCapture(blob);
       stopCamera();
-    } catch (error) {
-      console.error('Capture error:', error);
-      onError('Failed to capture image');
-    } finally {
+    };
+
+    mediaRecorder.start();
+    setIsCapturing(true);
+    console.log('Recording started');
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current) {
+      mediaRecorderRef.current.stop();
       setIsCapturing(false);
+      console.log('Recording stopped');
     }
   };
 
   // Cleanup on unmount
-  React.useEffect(() => {
+  useEffect(() => {
     return () => {
+      console.log('Component unmounting, stopping camera');
       stopCamera();
     };
   }, [stopCamera]);
+
+  useEffect(() => {
+    if (isInitialized && videoRef.current) {
+      console.log('Video element ready, playing video');
+      videoRef.current.play().catch((error) => {
+        console.error('Error playing video:', error);
+        onError('Error playing video');
+      });
+    }
+  }, [isInitialized, onError]);
 
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
     return (
@@ -110,9 +125,17 @@ export const FaceCapture: React.FC<FaceCaptureProps> = ({ onCapture, onError }) 
             playsInline
             className="w-full"
             onLoadedMetadata={() => {
+              console.log('Video metadata loaded');
               if (videoRef.current) {
-                videoRef.current.play();
+                videoRef.current.play().catch((error) => {
+                  console.error('Error playing video:', error);
+                  onError('Error playing video');
+                });
               }
+            }}
+            onError={(e) => {
+              console.error('Video error:', e);
+              onError('Error playing video');
             }}
           />
           <div className="absolute bottom-4 right-4">
@@ -126,20 +149,29 @@ export const FaceCapture: React.FC<FaceCaptureProps> = ({ onCapture, onError }) 
         </div>
       )}
 
+      {capturedVideo && (
+        <div className="relative rounded-lg overflow-hidden bg-black">
+          <video
+            src={capturedVideo}
+            controls
+            className="w-full"
+          />
+        </div>
+      )}
+
       <button
-        onClick={isInitialized ? captureFrame : initializeCamera}
-        disabled={isCapturing}
+        onClick={isInitialized ? (isCapturing ? stopRecording : startRecording) : initializeCamera}
+        disabled={isCapturing && !isInitialized}
         className="flex items-center justify-center w-full gap-2 py-3 px-4 bg-purple-600 
           text-white rounded-lg hover:bg-purple-700 disabled:bg-purple-300 
           transition-colors duration-200"
       >
         <Camera className="w-5 h-5" />
-        {isCapturing ? 'Processing...' : 
-         isInitialized ? 'Capture Photo' : 'Start Camera'}
+        {isCapturing ? 'Stop Recording' : 
+         isInitialized ? 'Start Recording' : 'Start Camera'}
       </button>
     </div>
   );
 };
 
-// Export as default as well
 export default FaceCapture;

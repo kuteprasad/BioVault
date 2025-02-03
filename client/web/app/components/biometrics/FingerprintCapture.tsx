@@ -52,11 +52,11 @@ const FingerprintCapture: React.FC<FingerprintCaptureProps> = ({ onCapture, onEr
           { type: "public-key", alg: -257 }, // RS256
         ],
         authenticatorSelection: {
-          authenticatorAttachment: "platform",
+          authenticatorAttachment: "platform" as AuthenticatorAttachment,
           userVerification: "required",
         },
         timeout: 60000,
-        attestation: "direct"
+        attestation: "direct" as AttestationConveyancePreference
       };
 
       const credential = await navigator.credentials.create({

@@ -23,7 +23,7 @@ const AddBiometrics = () => {
       const formData = new FormData();
       formData.append('biometricData', data.blob);
       formData.append('type', data.type);
-
+console.log(data.type)
       // Send to your backend
       const response = await fetch('/biometrics', {
         method: 'POST',
