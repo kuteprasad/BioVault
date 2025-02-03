@@ -6,8 +6,8 @@ load_dotenv()
 
 MONGO_DETAILS = os.getenv("MONGO_URI")
 
-client = motor.motor_asyncio.AsyncIOMotorClient(MONGO_DETAILS)
-db = client.get_default_database()
+client =  motor.motor_asyncio.AsyncIOMotorClient(MONGO_DETAILS)
+db = client.get_database()
 
 
 

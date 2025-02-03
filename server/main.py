@@ -1,21 +1,35 @@
-import sys
-import os
-from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles
-
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-
-from routes import auth, vault, biometric, activity_log, settings
+from fastapi import FastAPI, HTTPException
+from routes.auth import router as auth_router  # Import the router
+from models.user import User
+from database import db
+from utils.security import hash_password
+from datetime import datetime, timezone
 
 app = FastAPI()
 
-@app.get("/")
-async def read_root():
-    return {"message": "Welcome to the API"}
+# Include the auth router to access the /register endpoint
+app.include_router(auth_router, prefix="/auth")
 
-app.include_router(auth.router, prefix="/auth", tags=["auth"])
+# @app.get("/")
+# async def root():
+#     return {"message": "Hello World"}
 
+# @app.post("/register")
+# # async def register():
+# #     return {"message": "Auth register 0 endpoint"}
+# async def register(user: User):
+#     existing_user = await db.users.find_one({"email": user.email})
+#     if existing_user:
+#         raise HTTPException(status_code=400, detail="Email already registered")
 
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+#     hashed_password = hash_password(user.master_password)
+
+#     new_user = {
+#         "full_name": user.full_name,
+#         "email": user.email,
+#         "master_password": hashed_password,
+#         "created_at": datetime.now(timezone.utc),
+#         "updated_at": datetime.now(timezone.utc)
+#     }
+#     result = await db.users.insert_one(new_user)
+#     return {"message": "User registered successfully", "user_id": str(result.inserted_id)}

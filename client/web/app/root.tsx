@@ -1,3 +1,6 @@
+import { Provider } from 'react-redux';
+import store from './redux/store';
+
 import {
   isRouteErrorResponse,
   Links,
@@ -5,10 +8,14 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useRouteError,
 } from "react-router";
+
+import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 
 import type { Route } from "./+types/root";
 import "./app.css";
+import { AuthProvider } from "./context/AuthContext";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -29,6 +36,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>BioVault</title> 
         <Meta />
         <Links />
       </head>
@@ -42,13 +50,20 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  return <Outlet />;
+  return (
+    <Provider store={store}>
+      <AuthProvider>
+        <Outlet />
+      </AuthProvider>
+    </Provider>
+  );
 }
 
-export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
-  let message = "Oops!";
-  let details = "An unexpected error occurred.";
-  let stack: string | undefined;
+export function ErrorBoundary() {
+  const error = useRouteError();
+  let message = "Oops! Something went wrong.";
+  let details = "";
+  let stack = null;
 
   if (isRouteErrorResponse(error)) {
     message = error.status === 404 ? "404" : "Error";
@@ -62,14 +77,30 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   }
 
   return (
-    <main className="pt-16 p-4 container mx-auto">
-      <h1>{message}</h1>
-      <p>{details}</p>
-      {stack && (
-        <pre className="w-full p-4 overflow-x-auto">
-          <code>{stack}</code>
-        </pre>
-      )}
+    <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-white p-4">
+      <div className="max-w-2xl w-full bg-white rounded-2xl shadow-lg p-8 text-center space-y-6">
+        <div className="flex justify-center">
+          <ExclamationTriangleIcon className="h-16 w-16 text-purple-500" />
+        </div>
+        
+        <h1 className="text-3xl font-bold text-gray-900">{message}</h1>
+        
+        <p className="text-lg text-gray-600">{details}</p>
+        
+        {stack && (
+          <pre className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg text-left overflow-x-auto text-sm">
+            <code className="text-gray-700">{stack}</code>
+          </pre>
+        )}
+        
+        <a
+          href="/"
+          className="mt-8 inline-flex items-center px-6 py-3 bg-purple-600 hover:bg-purple-700 
+            text-white font-medium rounded-lg transition-colors duration-200"
+        >
+          Return to Home
+        </a>
+      </div>
     </main>
   );
 }

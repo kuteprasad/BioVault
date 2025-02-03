@@ -16,3 +16,10 @@ class PyObjectId(ObjectId):
         if not ObjectId.is_valid(v):
             raise ValueError(f"Invalid ObjectId: {v}")
         return ObjectId(v)
+    
+    # Modifies the OpenAPI schema to show ObjectId as a string.
+    @classmethod
+    def __get_pydantic_json_schema__(cls, schema, handler):
+        schema = handler(schema)
+        schema.update(type='string')
+        return schema

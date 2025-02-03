@@ -11,8 +11,7 @@ class User(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    model_config = ConfigDict(
-        populate_by_name=True,              # use the new key name
-        arbitrary_types_allowed=True,
-        json_encoders={ObjectId: str}
-    )
+    class Config:
+        populate_by_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}

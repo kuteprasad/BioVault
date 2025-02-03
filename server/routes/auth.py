@@ -1,37 +1,28 @@
-from fastapi import APIRouter, HTTPException, Depends
-from models.user import User  # Import the User schema from models
-from utils.security import get_password_hash, create_access_token, get_current_user
+from fastapi import APIRouter, HTTPException
 from datetime import datetime, timezone
+from models.user import User
 from database import db
-from bson import ObjectId as PyObjectId  
+from utils.security import hash_password
 
 router = APIRouter()
 
 @router.post("/register")
+# async def register():
+#     return {"message": "Auth register 1 endpoint"}
 async def register(user: User):
-    # Hash the master password
-    hashed_password = get_password_hash(user.master_password)
-    
-    # Create a new user instance with all required fields
-    new_user = User(
-        id=PyObjectId(),
-        full_name=user.full_name,
-        email=user.email,
-        master_password=hashed_password,
-        created_at=datetime.now(timezone.utc),
-        updated_at=datetime.now(timezone.utc)
-    )
-    
-    # Save the new user to the database
-    await db["users"].insert_one(new_user.dict(by_alias=True))
-    
-    return {"msg": "User registered successfully", "user": new_user}
+    existing_user = await db.users.find_one({"email": user.email})
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Email already registered")
 
-@router.post("/login")
-async def login(user: User):
-    # Verify user credentials and generate JWT token
-    return {"access_token": "token", "token_type": "bearer"}
+    hashed_password = hash_password(user.master_password)
 
-@router.get("/me", dependencies=[Depends(get_current_user)])
-async def read_users_me(current_user: User = Depends(get_current_user)):
-    return current_user
+    new_user = {
+        "full_name": user.full_name,
+        "email": user.email,
+        "master_password": hashed_password,
+        "created_at": datetime.now(timezone.utc),
+        "updated_at": datetime.now(timezone.utc)
+    }
+    result = await db.users.insert_one(new_user)
+    return {"message": "User registered successfully", "user_id": str(result.inserted_id)}
+
