@@ -15,7 +15,7 @@ export function Welcome() {
       >
         {/* Logo */}
         <div className="mb-4">
-          <BioVaultLogo />
+          <BioVaultLogo size="large" />
         </div>
 
         {/* Title */}
