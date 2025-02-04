@@ -12,7 +12,7 @@ export default [
     route("add-biometrics", "./auth/addBiometrics.tsx"),
 
     // Unauthenticated home page
-    // index("./routes/home1.tsx"),
+    index("./routes/home1.tsx"),
 
     // Authenticated routes wrapped inside ProtectedRoutes
     layout("./components/ProtectedRoutes.tsx", [
