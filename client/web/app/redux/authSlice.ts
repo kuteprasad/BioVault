@@ -35,7 +35,7 @@ export const signupUser = createAsyncThunk(
   async (userData: SignupData, { rejectWithValue }) => {
     try {
       const response = await signup(userData);
-      return response.data;
+      return response;
     } catch (error: any) {
       console.log("error in signup thunk: ", error);
       if (error.response && error.response.data) {
