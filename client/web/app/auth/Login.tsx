@@ -58,7 +58,8 @@ const Login: React.FC = () => {
     dispatch(loginUser({ email: formData.email, masterPassword: formData.masterPassword }) as any)
       .unwrap()
       .then((data : any) => {
-        setToken(data.token);
+        console.log("data in login: ", data);
+        // setToken(data.token);
         navigate('/');
       })
       .catch((error : any) => {
