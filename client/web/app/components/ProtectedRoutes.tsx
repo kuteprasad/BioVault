@@ -5,5 +5,5 @@ import type { RootState } from "../redux/store";
 export default function ProtectedRoutes() {
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
 
-  return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
+  return isAuthenticated ? <Outlet /> : <Navigate to="/home1" replace />;
 }

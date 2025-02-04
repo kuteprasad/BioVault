@@ -36,6 +36,7 @@ export const signupUser = createAsyncThunk(
       const response = await signup(userData);
       return response.data;
     } catch (error: any) {
+      console.log("error in signup thunk: ", error);
       if (error.response && error.response.data) {
         return rejectWithValue(error.response.data);
       }
@@ -49,8 +50,10 @@ export const loginUser = createAsyncThunk(
   async (loginData: LoginData, { rejectWithValue }) => {
     try {
       const response = await apiLogin(loginData.email, loginData.masterPassword);
+      console.log("response in login thunk: ", response);
       return response.data;
     } catch (error: any) {
+      console.log("error in login thunk: ", error);
       if (error.response && error.response.data) {
         return rejectWithValue(error.response.data);
       }

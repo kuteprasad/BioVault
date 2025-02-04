@@ -21,11 +21,12 @@ export const verifyOTP = async (email: string, otp: string) => {
 };
 
 // User login with email and password
-export const login = async (email: string, password: string) => {
+export const login = async (email: string, masterPassword: string) => {
   try {
-    const response = await api.post('/auth/login', { email, password });
+    const response = await api.post('/auth/login', { email, masterPassword });
     return response.data; // JWT token returned after successful login
   } catch (error: any) {
+    console.log("error in login: ", error);
     throw new Error(error.response?.data?.message || 'Login failed');
   }
 };

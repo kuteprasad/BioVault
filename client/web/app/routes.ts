@@ -10,9 +10,10 @@ export default [
     route("signup", "./auth/signup.tsx"),
     route("login", "./auth/login.tsx"),
     route("add-biometrics", "./auth/addBiometrics.tsx"),
-
-    // Unauthenticated home page
-    index("./routes/home1.tsx"),
+    
+    // Unauthenticated home page (instead of this, i added below thing)
+    // index("./routes/home1.tsx"),
+    route("home1", "./routes/home1.tsx"),
 
     // Authenticated routes wrapped inside ProtectedRoutes
     layout("./components/ProtectedRoutes.tsx", [
