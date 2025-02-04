@@ -1,64 +1,11 @@
 import { FC, useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import "./styles/scrollbar.css";
+import { samplePasswords } from "../../src/contentScript"
+import { PasswordEntry } from "../../src/contentScript";
 
-interface PasswordEntry {
-  id: string;
-  site: string;
-  username: string;
-  password: string;
-  notes?: string;
-  created_at: string;
-  updated_at: string;
-}
 
-const samplePasswords: PasswordEntry[] = [
-  {
-    id: "1",
-    site: "https://github.com",
-    username: "asdsd",
-    password: "SecurePass123!",
-    notes: "GitHub personal account",
-    created_at: new Date("2024-03-15").toISOString(),
-    updated_at: new Date("2024-03-15").toISOString(),
-  },
-  {
-    id: "23",
-    site: "https://github.com",
-    username: "devuser123",
-    password: "SecurePass123!",
-    notes: "GitHub personal account",
-    created_at: new Date("2024-03-15").toISOString(),
-    updated_at: new Date("2024-03-15").toISOString(),
-  },
-  {
-    id: "45",
-    site: "https://github.com",
-    username: "d888er123",
-    password: "SecurePass123!",
-    notes: "GitHub personal account",
-    created_at: new Date("2024-03-15").toISOString(),
-    updated_at: new Date("2024-03-15").toISOString(),
-  },
-  {
-    id: "2",
-    site: "https://circuitverse.org/users/sign_in",
-    username: "netflixuser",
-    password: "NetflixPass456!",
-    notes: "Family Netflix account",
-    created_at: new Date("2024-03-14").toISOString(),
-    updated_at: new Date("2024-03-14").toISOString(),
-  },
-  {
-    id: "3",
-    site: "https://amazon.com",
-    username: "shopper789",
-    password: "AmazonShop789!",
-    notes: "Prime shopping account",
-    created_at: new Date("2024-03-13").toISOString(),
-    updated_at: new Date("2024-03-13").toISOString(),
-  },
-];
+
 
 const Home: FC = () => {
   const { isAuthenticated } = useAuth();
@@ -153,11 +100,7 @@ const Home: FC = () => {
   return (
     <div className="w-[300px] bg-gradient-to-br from-slate-50 to-white p-2 relative overflow-hidden rounded-xl">
       {/* Animated Background Shapes */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute w-40 h-40 bg-purple-100/30 rounded-full -top-20 -right-20 blur-2xl animate-pulse" />
-        <div className="absolute w-32 h-32 bg-blue-100/20 rounded-full -bottom-16 -left-16 blur-2xl animate-pulse delay-700" />
-      </div>
-  
+
       {/* Glass Container */}
       <div className="relative backdrop-blur-sm bg-white/70 rounded-xl p-4 shadow-xl border border-white/50">
         {/* Header */}

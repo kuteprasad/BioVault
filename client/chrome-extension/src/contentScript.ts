@@ -5,7 +5,7 @@
 let focusTimeout: NodeJS.Timeout;
 
 
-interface PasswordEntry {
+export interface PasswordEntry {
   id: string;
   site: string;
   username: string;
@@ -17,11 +17,29 @@ interface PasswordEntry {
 
 
 
-const samplePasswords: PasswordEntry[] = [
+export const samplePasswords: PasswordEntry[] = [
   {
     id: "1",
     site: "https://github.com",
     username: "devuser123",
+    password: "SecurePass123!",
+    notes: "GitHub personal account",
+    created_at: new Date("2024-03-15").toISOString(),
+    updated_at: new Date("2024-03-15").toISOString(),
+  },
+  {
+    id: "13",
+    site: "https://github.com",
+    username: "AryaK19",
+    password: "SecurePass123!",
+    notes: "GitHub personal account",
+    created_at: new Date("2024-03-15").toISOString(),
+    updated_at: new Date("2024-03-15").toISOString(),
+  },
+  {
+    id: "21",
+    site: "https://github.com",
+    username: "aadsasd",
     password: "SecurePass123!",
     notes: "GitHub personal account",
     created_at: new Date("2024-03-15").toISOString(),
