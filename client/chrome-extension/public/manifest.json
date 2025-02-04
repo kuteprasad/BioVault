@@ -1,27 +1,42 @@
 {
-    "manifest_version": 3,
-    "name": "BioVault",
-    "version": "1.0",
-    "icons": {
-        "16": "icons/shield.png",
-        "32": "icons/shield.png",
-        "48": "icons/shield.png",
-        "128": "icons/shield.png"
-    },
-    "action": {
-        "default_popup": "index.html",
-        "default_icon": {
-            "16": "icons/shield.png",
-            "32": "icons/shield.png",
-            "48": "icons/shield.png",
-            "128": "icons/shield.png"
-        }
-    },
-    "permissions": [
-        "scripting"
-    ],
-    "host_permissions": [
-        "http://*/*",
-        "https://*/*"
-    ]
+  "manifest_version": 3,
+  "name": "BioVault",
+  "version": "1.0",
+  "permissions": [
+    "scripting",
+    "storage",
+    "tabs",
+    "activeTab",
+    "windows"
+  ],
+  "host_permissions": [
+    "http://localhost:5173/*",
+    "http://*/*",
+    "https://*/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["src/contentScript.ts"]
+    }
+  ],
+  "background": {
+    "service_worker": "src/background.ts",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "index.html",
+    "default_icon": {
+      "16": "icons/shield.png",
+      "32": "icons/shield.png",
+      "48": "icons/shield.png",
+      "128": "icons/shield.png"
+    }
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["icons/*"],
+      "matches": ["<all_urls>"]
+    }
+  ]
 }

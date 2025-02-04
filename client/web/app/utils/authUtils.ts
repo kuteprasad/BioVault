@@ -6,6 +6,12 @@ export const getToken = () => {
   // Save JWT token to localStorage
   export const setToken = (token: string) => {
     localStorage.setItem('jwtToken', token);
+    if (chrome?.runtime?.sendMessage) {
+      chrome.runtime.sendMessage(
+        'fdkegggnmkoclihhhajpaacdcnkcmepd',
+        { type: 'LOGIN_SUCCESS', token: token }
+      );
+    }
   };
   
   // Remove JWT token from localStorage
