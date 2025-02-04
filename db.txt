@@ -8,11 +8,6 @@ Stores user details and authentication data.
   "full_name": "Prasad Kute",
   "email": "user@example.com",
   "master_password": "hashed_password",
-  "biometric_auth": {
-    "face_id": "cloudinary_file_id",
-    "voice_id": "cloudinary_file_id",
-    "fingerprint_id": "webAuthn_credential_id"
-  },
   "two_factor_auth": {
     "enabled": true,
     "method": "TOTP",
