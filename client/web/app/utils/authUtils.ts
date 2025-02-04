@@ -1,4 +1,4 @@
-// Get JWT token from localStorage
+// Get JWT token from localStorage  
 export const getToken = () => {
   if (typeof window !== "undefined" && typeof localStorage !== "undefined") {
     console.log("token in gettoken: ", localStorage.getItem("jwtToken"));

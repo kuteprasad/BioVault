@@ -1,75 +1,84 @@
 import { toast } from 'sonner';
 import api from '../utils/api';
+import { getToken } from '../utils/authUtils';
 
 // Type definitions
 export interface PasswordEntry {
-  id?: string;
+  _id?: string;
   site: string;
   username: string;
-  password: string;
+  passwordEncrypted: string;
   notes?: string;
-  created_at?: string;
-  updated_at?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 class PasswordService {
-  private baseUrl = '/passwords'; // Adjust to your API endpoint
+  private baseUrl = '/api/passwords'; // Match your backend route
 
-  // Fetch all passwords
-  async getAllPasswords(): Promise<PasswordEntry[]> {
+  async getVault(): Promise<PasswordEntry[]> {
     try {
-      const response = await api.get(this.baseUrl);
-      return response.data;
-    } catch (error) {
-      toast.error('Error fetching passwords');
-      return [];
+      const token = getToken();
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      const response = await api.get(`${this.baseUrl}/vault`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      return response.data.passwords || [];
+    } catch (error: any) {
+      console.error('Error fetching vault:', error);
+      throw new Error(error.response?.data?.message || 'Failed to fetch passwords');
     }
   }
 
-  // Fetch a single password entry
-  async getPasswordById(id: string): Promise<PasswordEntry | null> {
+  async addPassword(password: Omit<PasswordEntry, '_id'>): Promise<PasswordEntry> {
     try {
-      const response = await api.get(`${this.baseUrl}/${id}`);
-      return response.data;
-    } catch (error) {
-      toast.error('Error fetching password entry');
-      return null;
+      const token = getToken();
+      const response = await api.post(`${this.baseUrl}/add`, password, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      toast.success('Password added successfully');
+      return response.data.password;
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Error adding password');
+      throw error;
     }
   }
 
-  // Create a new password entry
-  async createPassword(entry: Omit<PasswordEntry, 'id'>): Promise<PasswordEntry | null> {
+  async updatePassword(passwordId: string, password: Partial<PasswordEntry>): Promise<PasswordEntry> {
     try {
-      const response = await api.post(this.baseUrl, entry);
-      toast.success('Password entry created successfully');
-      return response.data;
-    } catch (error) {
-      toast.error('Error creating password entry');
-      return null;
+      const token = getToken();
+      const response = await api.put(`${this.baseUrl}/${passwordId}`, password, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      toast.success('Password updated successfully');
+      return response.data.password;
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Error updating password');
+      throw error;
     }
   }
 
-  // Update an existing password entry
-  async updatePassword(id: string, entry: Partial<PasswordEntry>): Promise<PasswordEntry | null> {
+  async deletePassword(passwordId: string): Promise<void> {
     try {
-      const response = await api.put(`${this.baseUrl}/${id}`, entry);
-      toast.success('Password entry updated successfully');
-      return response.data;
-    } catch (error) {
-      toast.error('Error updating password entry');
-      return null;
-    }
-  }
-
-  // Delete a password entry
-  async deletePassword(id: string): Promise<boolean> {
-    try {
-      await api.delete(`${this.baseUrl}/${id}`);
-      toast.success('Password entry deleted successfully');
-      return true;
-    } catch (error) {
-      toast.error('Error deleting password entry');
-      return false;
+      const token = getToken();
+      await api.delete(`${this.baseUrl}/${passwordId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      toast.success('Password deleted successfully');
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Error deleting password');
+      throw error;
     }
   }
 }

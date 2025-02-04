@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import connectDB from './config/db.js';
 import authRoutes from './routes/auth.js';
+import vaultRoutes from './routes/vaultRoutes.js';
 import bodyParser from 'body-parser';
 
 dotenv.config();
@@ -23,6 +24,7 @@ app.use(express.json());
 
 // Routes
 app.use('/auth', authRoutes);
+app.use('/api/passwords', vaultRoutes);
 
 // Test endpoint
 app.get('/test', (req, res) => {
