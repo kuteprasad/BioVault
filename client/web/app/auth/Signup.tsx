@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { sendOTP, verifyOTP } from '../services/authService';
 import { signupUser } from '../redux/authSlice';
-import type { AppDispatch } from '../redux/store';
+import type { AppDispatch, RootState } from '../redux/store';
+import { setToken } from '../utils/authUtils';
 import { Mail, Lock, ArrowRight, User } from 'lucide-react';
 import { toast } from 'sonner';
 
 const Signup: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
+  const { loading, error } = useSelector((state: RootState) => state.auth);
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -45,52 +47,51 @@ const Signup: React.FC = () => {
       await sendOTP(formData.email);
       setIsOtpSent(true);
       setTimeLeft(60);
-      toast.success('OTP sent successfully! Please check your email.');
+      toast.success('OTP sent successfully!');
     } catch (error) {
       toast.error('Failed to send OTP. Please try again.');
     }
   };
 
-  const handleSignup = async () => {
+  const handleVerifyOTP = async () => {
     try {
-      if (!formData.fullName || !formData.email || !formData.masterPassword || !formData.confirmMasterPassword || !formData.otp) {
-        toast.error('Please fill in all fields');
+      if (!formData.otp) {
+        toast.error('Please enter the OTP');
         return;
       }
-
-      if (formData.masterPassword !== formData.confirmMasterPassword) {
-        toast.error('Master passwords do not match');
-        return;
-      }
-
-      // Verify OTP first
-      const otpResponse = await verifyOTP(formData.email, formData.otp);
-      if (otpResponse.success) {
-        // Dispatch signup action
-        const result = await dispatch(signupUser({
-          fullName: formData.fullName,
-          email: formData.email,
-          masterPassword: formData.masterPassword,
-        })).unwrap();
-        
-        if (result) {
-          navigate('/add-biometrics');
-        }
-      }
+      await verifyOTP(formData.email, formData.otp);
+      toast.success('OTP verified successfully!');
     } catch (error) {
-      toast.error('Signup failed. Please try again.');
+      toast.error('Failed to verify OTP. Please try again.');
     }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (formData.masterPassword !== formData.confirmMasterPassword) {
+      toast.error('Passwords do not match');
+      return;
+    }
+    dispatch(signupUser({ fullName: formData.fullName, email: formData.email, masterPassword: formData.masterPassword }) as any)
+      .unwrap()
+      .then((data: any) => {
+        setToken(data.token);
+        navigate('/dashboard');
+      })
+      .catch((error: any) => {
+        toast.error(error);
+      });
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-white">
       <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-2xl shadow-lg">
         <div className="text-center space-y-2">
-          <h2 className="text-3xl font-bold text-gray-900">BioVault</h2>
+          <h2 className="text-3xl font-bold text-gray-900">Create an Account</h2>
           <p className="text-gray-500">Sign up to get started</p>
         </div>
 
-        <div className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           {/* Full Name Input */}
           <div className="space-y-2">
             <label htmlFor="fullName" className="text-sm font-medium text-gray-700">
@@ -201,21 +202,24 @@ const Signup: React.FC = () => {
           </div>
 
           <button
-            onClick={handleSignup}
+            type="submit"
+            disabled={loading}
             className="w-full flex items-center justify-center gap-2 bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 transition-colors duration-200"
           >
-            Signup and Add Biometrics
+            Sign Up
             <ArrowRight className="h-4 w-4" />
           </button>
+          {error && <p>{error}</p>}
+
           <div className="text-center">
             <a 
               href="/login" 
               className="text-purple-600 hover:text-purple-700 text-sm font-medium"
             >
-              Already have an account? Log In
+              Already have an account? Log in
             </a>
           </div>
-        </div>
+        </form>
       </div>
     </div>
   );

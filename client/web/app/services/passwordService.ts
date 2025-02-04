@@ -1,4 +1,5 @@
 import { toast } from 'sonner';
+import api from '../utils/api';
 
 // Type definitions
 export interface PasswordEntry {
@@ -12,16 +13,13 @@ export interface PasswordEntry {
 }
 
 class PasswordService {
-  private baseUrl = 'localhost:3000/api/passwords'; // Adjust to your API endpoint
+  private baseUrl = '/passwords'; // Adjust to your API endpoint
 
   // Fetch all passwords
   async getAllPasswords(): Promise<PasswordEntry[]> {
     try {
-      const response = await fetch(this.baseUrl);
-      if (!response.ok) {
-        throw new Error('Failed to fetch passwords');
-      }
-      return await response.json();
+      const response = await api.get(this.baseUrl);
+      return response.data;
     } catch (error) {
       toast.error('Error fetching passwords');
       return [];
@@ -31,11 +29,8 @@ class PasswordService {
   // Fetch a single password entry
   async getPasswordById(id: string): Promise<PasswordEntry | null> {
     try {
-      const response = await fetch(`${this.baseUrl}/${id}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch password entry');
-      }
-      return await response.json();
+      const response = await api.get(`${this.baseUrl}/${id}`);
+      return response.data;
     } catch (error) {
       toast.error('Error fetching password entry');
       return null;
@@ -45,21 +40,9 @@ class PasswordService {
   // Create a new password entry
   async createPassword(entry: Omit<PasswordEntry, 'id'>): Promise<PasswordEntry | null> {
     try {
-      const response = await fetch(this.baseUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(entry)
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to create password entry');
-      }
-
-      const createdEntry = await response.json();
+      const response = await api.post(this.baseUrl, entry);
       toast.success('Password entry created successfully');
-      return createdEntry;
+      return response.data;
     } catch (error) {
       toast.error('Error creating password entry');
       return null;
@@ -69,21 +52,9 @@ class PasswordService {
   // Update an existing password entry
   async updatePassword(id: string, entry: Partial<PasswordEntry>): Promise<PasswordEntry | null> {
     try {
-      const response = await fetch(`${this.baseUrl}/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(entry)
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update password entry');
-      }
-
-      const updatedEntry = await response.json();
+      const response = await api.put(`${this.baseUrl}/${id}`, entry);
       toast.success('Password entry updated successfully');
-      return updatedEntry;
+      return response.data;
     } catch (error) {
       toast.error('Error updating password entry');
       return null;
@@ -93,14 +64,7 @@ class PasswordService {
   // Delete a password entry
   async deletePassword(id: string): Promise<boolean> {
     try {
-      const response = await fetch(`${this.baseUrl}/${id}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to delete password entry');
-      }
-
+      await api.delete(`${this.baseUrl}/${id}`);
       toast.success('Password entry deleted successfully');
       return true;
     } catch (error) {

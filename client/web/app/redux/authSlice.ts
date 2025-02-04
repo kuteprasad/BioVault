@@ -1,17 +1,22 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
-import { signup as signupService } from '../services/authService';
+import { signup, checkUserExists, login as apiLogin } from '../services/authService';
 
 interface AuthState {
   token: string | null;
   isAuthenticated: boolean;
   loading: boolean;
-  error: any;
+  error: string | null;
   userData: any;
 }
 
 interface SignupData {
   fullName: string;
+  email: string;
+  masterPassword: string;
+}
+
+interface LoginData {
   email: string;
   masterPassword: string;
 }
@@ -25,13 +30,35 @@ const initialState: AuthState = {
 };
 
 export const signupUser = createAsyncThunk(
-  '/signup',
+  'auth/signup',
   async (userData: SignupData, { rejectWithValue }) => {
     try {
-      const response = await signupService(userData);
-      return response;
-    } catch (error) {
-      return rejectWithValue(error);
+      const userExists = await checkUserExists(userData.email);
+      if (userExists.data.exists) {
+        return rejectWithValue('User already exists');
+      }
+      const response = await signup(userData);
+      return response.data;
+    } catch (error: any) {
+      if (error.response && error.response.data) {
+        return rejectWithValue(error.response.data);
+      }
+      return rejectWithValue('Signup failed');
+    }
+  }
+);
+
+export const loginUser = createAsyncThunk(
+  'auth/login',
+  async (loginData: LoginData, { rejectWithValue }) => {
+    try {
+      const response = await apiLogin(loginData.email, loginData.masterPassword);
+      return response.data;
+    } catch (error: any) {
+      if (error.response && error.response.data) {
+        return rejectWithValue(error.response.data);
+      }
+      return rejectWithValue('Login failed');
     }
   }
 );
@@ -40,13 +67,15 @@ const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    login: (state, action: PayloadAction<string>) => {
-      state.token = action.payload;
+    setLogin: (state, action: PayloadAction<{ token: string; userData: any }>) => {
+      state.token = action.payload.token;
       state.isAuthenticated = true;
+      state.userData = action.payload.userData;
     },
     logout: (state) => {
       state.token = null;
       state.isAuthenticated = false;
+      state.userData = null;
     },
   },
   extraReducers: (builder) => {
@@ -61,10 +90,24 @@ const authSlice = createSlice({
       })
       .addCase(signupUser.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.error = action.payload as string;
+      })
+      .addCase(loginUser.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(loginUser.fulfilled, (state, action) => {
+        state.loading = false;
+        state.token = action.payload.token;
+        state.isAuthenticated = true;
+        state.userData = action.payload.userData;
+      })
+      .addCase(loginUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
       });
   },
 });
 
-export const { login, logout } = authSlice.actions;
+export const { setLogin, logout } = authSlice.actions;
 export default authSlice.reducer;

@@ -2,13 +2,20 @@ import { useState, useEffect } from 'react';
 import { Mail, User, Lock, ChevronUp, ChevronDown, Fingerprint, Camera, Mic } from 'lucide-react';
 import { toast } from 'sonner';
 import BiometricCapture from '../../components/biometrics/BiometricCapture';
-import { useAuth } from '../../context/AuthContext';
+import { useSelector } from "react-redux";
+import type { RootState } from "../../redux/store";
+
 
 type Section = 'personal' | 'biometrics' | null;
 type BiometricType = 'fingerprint' | 'photo' | 'voice' | null;
 
+
+
+
+
 export default function UpdateProfile() {
-  const { user } = useAuth();
+  const user = useSelector((state: RootState) => state.auth.userData);
+
   const [activeSection, setActiveSection] = useState<Section>(null);
   const [activeBiometric, setActiveBiometric] = useState<BiometricType>(null);
   const [showPasswordModal, setShowPasswordModal] = useState(false);

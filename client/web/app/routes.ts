@@ -4,7 +4,7 @@ import {
     index,
     layout,
 } from "@react-router/dev/routes";
-import ProtectedRoutes from "./components/ProtectedRoutes";
+
 
 export default [
     route("signup", "./auth/signup.tsx"),
