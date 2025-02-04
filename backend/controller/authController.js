@@ -2,6 +2,7 @@ import User from '../models/User.js';
 import jwt from 'jsonwebtoken';
 import { sendEmail } from '../utils/sendEmail.js';
 import dotenv from 'dotenv';
+import bcrypt from 'bcrypt';
 
 dotenv.config();
 
@@ -29,7 +30,8 @@ const signup = async (req, res) => {
   const { fullName, email, masterPassword } = req.body;
 
   try {
-    const user = new User({ fullName, email, masterPassword });
+    const hashedPassword = await bcrypt.hash(masterPassword, 10);
+    const user = new User({ fullName, email, masterPassword: hashedPassword });
     await user.save();
     res.status(201).json({ message: 'User registered successfully' });
   } catch (error) {
@@ -42,8 +44,14 @@ const login = async (req, res) => {
 
   try {
     const user = await User.findOne({ email });
-    if (!user || user.masterPassword !== masterPassword) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+    if (!user) {
+      return res.status(401).json({ message: 'User not Found' });
+    }
+
+    const isPasswordValid = await bcrypt.compare(masterPassword, user.masterPassword);
+
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: 'Invalid Password' });
     }
 
     const token = jwt.sign({ userId: user._id }, process.env.SECRET_KEY, { expiresIn: '1h' });

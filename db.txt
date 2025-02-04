@@ -27,8 +27,7 @@ Stores encrypted passwords for each user.
 
 {
   "_id": ObjectId,
-  "user_id": ObjectId, 
-  "vault_name": "Work Accounts",
+  "user_id": ObjectId,
   "passwords": [
     {
       "site": "https://github.com",

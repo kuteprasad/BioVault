@@ -1,11 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { sendOTP, verifyOTP } from '../services/authService';
 import { useNavigate } from 'react-router';
-import { useAuth } from '../context/AuthContext';
+import { useDispatch, useSelector } from 'react-redux';
+import { loginUser } from '../redux/authSlice';
+import { sendOTP } from '../services/authService';
+import type { RootState } from '../redux/store';
+import { setToken } from '../utils/authUtils';
+
 import { Mail, Lock, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
 
 const Login: React.FC = () => {
+  const dispatch = useDispatch();
+  const { loading, error } = useSelector((state: RootState) => state.auth);
   const [formData, setFormData] = useState({
     email: '',
     masterPassword: '',
@@ -14,7 +20,6 @@ const Login: React.FC = () => {
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [timeLeft, setTimeLeft] = useState(60);
   const [otpTimer, setOtpTimer] = useState<NodeJS.Timeout | null>(null);
-  const { login } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -47,16 +52,17 @@ const Login: React.FC = () => {
     }
   };
 
-  const handleLogin = async () => {
-    try {
-      const response = await verifyOTP(email, otp);
-      login(response.token);
-      toast.success('Login successful!');
-      // navigate('/home2');
-      navigate('/add-biometrics');
-    } catch (error) {
-      toast.error('Login failed. Please check your credentials.');
-    }
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    dispatch(loginUser({ email: formData.email, masterPassword: formData.masterPassword }) as any)
+      .unwrap()
+      .then((data : any) => {
+        setToken(data.token);
+        navigate('/');
+      })
+      .catch((error : any) => {
+        toast.error(error);
+      });
   };
 
   return (
@@ -67,7 +73,7 @@ const Login: React.FC = () => {
           <p className="text-gray-500">Sign in to your account</p>
         </div>
 
-        <div className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           {/* Email Input */}
           <div className="space-y-2">
             <label htmlFor="email" className="text-sm font-medium text-gray-700">
@@ -140,12 +146,14 @@ const Login: React.FC = () => {
           </div>
 
           <button
-            onClick={handleLogin}
+            type="submit"
+            disabled={loading}
             className="w-full flex items-center justify-center gap-2 bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 transition-colors duration-200"
           >
             Log In
             <ArrowRight className="h-4 w-4" />
           </button>
+          {error && <p>{error}</p>}
 
           <div className="text-center">
             <a 
@@ -155,7 +163,7 @@ const Login: React.FC = () => {
               Don't have an account? Sign up
             </a>
           </div>
-        </div>
+        </form>
       </div>
     </div>
   );
