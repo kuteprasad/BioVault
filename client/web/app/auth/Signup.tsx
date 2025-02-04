@@ -77,7 +77,7 @@ const Signup: React.FC = () => {
     dispatch(signupUser({ fullName: formData.fullName, email: formData.email, masterPassword: formData.masterPassword }) as any)
       .unwrap()
       .then((data : any) => {
-        setToken(data.token);
+        // setToken(data.token);
         navigate('/');
       })
       .catch((error: any) => {

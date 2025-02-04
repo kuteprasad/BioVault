@@ -88,7 +88,10 @@ const authSlice = createSlice({
       })
       .addCase(signupUser.fulfilled, (state, action) => {
         state.loading = false;
-        state.userData = action.payload;
+        state.token = action.payload.token;
+        state.isAuthenticated = true;
+        state.userData = action.payload.userData;
+        setToken(action.payload.token);
       })
       .addCase(signupUser.rejected, (state, action) => {
         state.loading = false;
