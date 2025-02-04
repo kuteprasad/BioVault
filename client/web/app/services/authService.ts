@@ -66,3 +66,25 @@ export const saveBiometricData = async (formData: FormData) => {
     throw error;
   }
 };
+
+// ... existing code ...
+
+// Fetch user profile
+export const fetchUserProfile = async () => {
+  try {
+    const token = getToken();
+    console.log("Fetching profile with token:", token ? "Token exists" : "No token");
+    
+    const response = await api.get('/auth/profile', {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    
+    console.log("Profile API response:", response.data);
+    return response.data;
+  } catch (error: any) {
+    console.error("Profile fetch error in service:", error);
+    throw new Error(error.response?.data?.message || 'Failed to fetch profile');
+  }
+};

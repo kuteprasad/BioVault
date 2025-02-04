@@ -4,21 +4,19 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const authMiddleware = (req, res, next) => {
-  console.log("Received Token:", req.headers.authorization);
-
-
-  const token = req.header('Authorization').replace('Bearer ', '');
-  if (!token) {
-    return res.status(401).json({ message: 'No token, authorization denied' });
-  }
-
-  // console.log("Token:", token);
   try {
+    const token = req.headers.authorization?.split(' ')[1];
+    
+    if (!token) {
+      return res.status(401).json({ message: 'No token provided' });
+    }
+
     const decoded = jwt.verify(token, process.env.SECRET_KEY);
-    req.user = decoded;
+    req.user = { userId: decoded.userId };  // Make sure this matches your token structure
     next();
   } catch (error) {
-    res.status(401).json({ message: 'Token is not valid' });
+    console.error('Auth middleware error:', error);
+    res.status(401).json({ message: 'Invalid token' });
   }
 };
 

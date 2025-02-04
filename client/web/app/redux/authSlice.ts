@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
-import { signup, login as apiLogin } from '../services/authService';
+import { signup, login as apiLogin, fetchUserProfile } from '../services/authService';
 import { getToken, setToken, removeToken } from '../utils/authUtils';
 
 interface AuthState {
@@ -63,6 +63,21 @@ export const loginUser = createAsyncThunk(
   }
 );
 
+// Add fetchProfile thunk
+export const fetchProfile = createAsyncThunk(
+  'auth/fetchProfile',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await fetchUserProfile();
+      console.log("Profile fetch response:", response);
+      return response;
+    } catch (error: any) {
+      console.error("Profile fetch error:", error);
+      return rejectWithValue(error.message || 'Failed to fetch profile');
+    }
+  }
+);
+
 const authSlice = createSlice({
   name: 'auth',
   initialState,
@@ -109,6 +124,21 @@ const authSlice = createSlice({
         setToken(action.payload.token);
       })
       .addCase(loginUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(fetchProfile.pending, (state) => {
+        console.log("Profile fetch pending");
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchProfile.fulfilled, (state, action) => {
+        console.log("Profile fetch fulfilled:", action.payload);
+        state.loading = false;
+        state.userData = action.payload;
+      })
+      .addCase(fetchProfile.rejected, (state, action) => {
+        console.log("Profile fetch rejected:", action.payload);
         state.loading = false;
         state.error = action.payload as string;
       });

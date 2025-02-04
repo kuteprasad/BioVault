@@ -67,28 +67,27 @@ const signup = async (req, res) => {
 
 const login = async (req, res) => {
   const { email, masterPassword } = req.body;
-  console.log("data in login: ", req.body);
   try {
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(401).json({ message: 'User not Found' });
     }
 
-    console.log("user in login:", user);
-    console.log("masterPassword in login:", user.masterPassword);
-
     const isPasswordValid = await bcrypt.compare(masterPassword, user.masterPassword);
-
     if (!isPasswordValid) {
       return res.status(401).json({ message: 'Invalid Password' });
     }
 
+    // Include user data in response
+    const userData = {
+      _id: user._id,
+      fullName: user.fullName,
+      email: user.email
+    };
+
     const token = jwt.sign({ userId: user._id }, process.env.SECRET_KEY, { expiresIn: '1h' });
-
-    console.log("login successfull from backend");
-    res.status(200).json({ token });
+    res.status(200).json({ token, userData });
   } catch (error) {
-
     console.log("error at login:", error);
     res.status(500).json({ message: 'Error logging in', error });
   }
@@ -184,4 +183,22 @@ const saveBiometricData = async (req, res) => {
   }
 };
 
-export { sendOTP, verifyOTP, signup, login, saveBiometricData };
+const getProfile = async (req, res) => {
+  try {
+    console.log("Getting profile for userId:", req.user.userId);
+    const user = await User.findById(req.user.userId).select('-masterPassword');
+    
+    if (!user) {
+      console.log("User not found for ID:", req.user.userId);
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    console.log("Found user:", user);
+    res.json(user);
+  } catch (error) {
+    console.error("Error in getProfile:", error);
+    res.status(500).json({ message: 'Error fetching profile', error });
+  }
+};
+
+export { sendOTP, verifyOTP, signup, login, saveBiometricData, getProfile };
