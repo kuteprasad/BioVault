@@ -72,6 +72,7 @@ const Signup: React.FC = () => {
       toast.error('Passwords do not match');
       return;
     }
+    handleVerifyOTP();
     dispatch(signupUser({ fullName: formData.fullName, email: formData.email, masterPassword: formData.masterPassword }) as any)
       .unwrap()
       .then((data: any) => {
