@@ -2,7 +2,7 @@ import type { ExtensionMessage } from "./types/messages";
 import { samplePasswords } from "./data/samplePasswords";
 
 // Listen for form field focus events from content script
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
   console.log("DEBUG: Message received:", message);
 
   try {
@@ -39,16 +39,20 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           });
 
           // Store form data before opening popup
-          await chrome.storage.local.set({
-            currentFormData: {
-              ...message.data,
-              tabId,
-              url
-            }
+          await new Promise<void>((resolve) => {
+            chrome.storage.local.set({
+              currentFormData: {
+                ...message.data,
+                tabId,
+                url
+              }
+            }, () => resolve());
           });
 
           // Open popup after data is stored
-          await chrome.action.openPopup();
+          await new Promise<void>((resolve) => {
+            chrome.action.openPopup().then(() => resolve());
+          });
           
           sendResponse({ success: true });
         } catch (error) {
