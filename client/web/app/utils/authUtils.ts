@@ -1,4 +1,6 @@
 // Get JWT token from localStorage
+
+
 export const getToken = () => {
     return localStorage.getItem('jwtToken');
   };

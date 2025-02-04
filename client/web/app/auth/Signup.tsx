@@ -48,8 +48,8 @@ const Signup: React.FC = () => {
       setIsOtpSent(true);
       setTimeLeft(60);
       toast.success('OTP sent successfully!');
-    } catch (error) {
-      toast.error('Failed to send OTP. Please try again.');
+    } catch (error: any) {
+      toast.error(error.message);
     }
   };
 
@@ -61,8 +61,8 @@ const Signup: React.FC = () => {
       }
       await verifyOTP(formData.email, formData.otp);
       toast.success('OTP verified successfully!');
-    } catch (error) {
-      toast.error('Failed to verify OTP. Please try again.');
+    } catch (error: any) {
+      toast.error(error.message);
     }
   };
 
@@ -72,15 +72,14 @@ const Signup: React.FC = () => {
       toast.error('Passwords do not match');
       return;
     }
-    handleVerifyOTP();
     dispatch(signupUser({ fullName: formData.fullName, email: formData.email, masterPassword: formData.masterPassword }) as any)
       .unwrap()
-      .then((data: any) => {
+      .then((data : any) => {
         setToken(data.token);
-        navigate('/dashboard');
+        navigate('/');
       })
       .catch((error: any) => {
-        toast.error(error);
+        toast.error(error.message);
       });
   };
 
