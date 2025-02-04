@@ -1,43 +1,143 @@
 // Safe message sending function with proper typing
-interface PasswordEntry {
-    id: string;
-    site: string;
-    username: string;
-    password: string;
-    notes?: string;
-    created_at: string;
-    updated_at: string;
+
+
+// Properly typed form field handler with debouncing
+let focusTimeout: NodeJS.Timeout;
+
+
+export interface PasswordEntry {
+  id: string;
+  site: string;
+  username: string;
+  password: string;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+
+
+export const samplePasswords: PasswordEntry[] = [
+  {
+    id: "1",
+    site: "https://github.com",
+    username: "devuser123",
+    password: "SecurePass123!",
+    notes: "GitHub personal account",
+    created_at: new Date("2024-03-15").toISOString(),
+    updated_at: new Date("2024-03-15").toISOString(),
+  },
+  {
+    id: "13",
+    site: "https://github.com",
+    username: "AryaK19",
+    password: "SecurePass123!",
+    notes: "GitHub personal account",
+    created_at: new Date("2024-03-15").toISOString(),
+    updated_at: new Date("2024-03-15").toISOString(),
+  },
+  {
+    id: "21",
+    site: "https://github.com",
+    username: "aadsasd",
+    password: "SecurePass123!",
+    notes: "GitHub personal account",
+    created_at: new Date("2024-03-15").toISOString(),
+    updated_at: new Date("2024-03-15").toISOString(),
+  },
+  {
+    id: "2",
+    site: "https://circuitverse.org/users/sign_in",
+    username: "netflixuser",
+    password: "NetflixPass456!",
+    notes: "Family Netflix account",
+    created_at: new Date("2024-03-14").toISOString(),
+    updated_at: new Date("2024-03-14").toISOString(),
+  },
+  {
+    id: "3",
+    site: "https://amazon.com",
+    username: "shopper789",
+    password: "AmazonShop789!",
+    notes: "Prime shopping account",
+    created_at: new Date("2024-03-13").toISOString(),
+    updated_at: new Date("2024-03-13").toISOString(),
+  },
+];
+
+function fillFormFields(credentials: { username: string; password: string }) {
+  console.log("DEBUG: Filling form fields...");
+
+  // Cast NodeList to Array and filter for input elements
+  const inputs: HTMLInputElement[] = Array.from(
+    document.querySelectorAll("input")
+  ).filter((el): el is HTMLInputElement => el instanceof HTMLInputElement);
+
+  // Find username/email field with more flexible matching
+  const usernameField = inputs.find((input) => {
+    const inputType = input.type.toLowerCase();
+    const inputName = (input.name || input.id || '').toLowerCase();
+    const inputPlaceholder = (input.placeholder || '').toLowerCase();
+    
+    // Check for common username/email field identifiers
+    const isUsernameOrEmail = [
+      'username',
+      'email',
+      'user',
+      'login',
+      'userid',
+      'account'
+    ].some(term => 
+      inputName.includes(term) || 
+      inputPlaceholder.includes(term)
+    );
+
+    return (
+      // Match by input type
+      inputType === "email" ||
+      inputType === "text" ||
+      // Match by name/id/placeholder containing common terms
+      isUsernameOrEmail
+    );
+  });
+
+  // Find password field
+  const passwordField = inputs.find(
+    (input) => input.type.toLowerCase() === "password"
+  );
+
+  // Fill username/email if found
+  if (usernameField) {
+    usernameField.value = credentials.username;
+    usernameField.dispatchEvent(new Event("input", { bubbles: true }));
+    usernameField.dispatchEvent(new Event("change", { bubbles: true }));
+    console.log("DEBUG: Username/Email field filled");
+  } else {
+    console.log("DEBUG: No username/email field found");
   }
-  
-  const samplePasswords: PasswordEntry[] = [
-    {
-      id: "1",
-      site: "https://github.com",
-      username: "devuser123",
-      password: "SecurePass123!",
-      notes: "GitHub personal account",
-      created_at: new Date("2024-03-15").toISOString(),
-      updated_at: new Date("2024-03-15").toISOString(),
-    },
-    {
-      id: "2",
-      site: "https://circuitverse.org/users/sign_in",
-      username: "netflixuser",
-      password: "NetflixPass456!",
-      notes: "Family Netflix account",
-      created_at: new Date("2024-03-14").toISOString(),
-      updated_at: new Date("2024-03-14").toISOString(),
-    },
-    {
-      id: "3",
-      site: "https://amazon.com",
-      username: "shopper789",
-      password: "AmazonShop789!",
-      notes: "Prime shopping account",
-      created_at: new Date("2024-03-13").toISOString(),
-      updated_at: new Date("2024-03-13").toISOString(),
-    },
-  ];
+
+  // Fill password if found
+  if (passwordField) {
+    passwordField.value = credentials.password;
+    passwordField.dispatchEvent(new Event("input", { bubbles: true }));
+    passwordField.dispatchEvent(new Event("change", { bubbles: true }));
+    console.log("DEBUG: Password field filled");
+  } else {
+    console.log("DEBUG: No password field found");
+  }
+
+  return { usernameField, passwordField };
+}
+
+function checkUrlInPasswords(currentUrl: string, passwords: PasswordEntry[]): boolean {  // Normalize the current URL
+  const normalizedCurrentUrl = new URL(currentUrl).origin;
+
+  // Check if any password entry matches the current URL
+  return passwords.some((entry) => {
+    const entryUrl = new URL(entry.site).origin;
+    return normalizedCurrentUrl === entryUrl;
+  });
+}
 
 
 function sendMessageToBackground(message: {
@@ -61,21 +161,6 @@ function sendMessageToBackground(message: {
   });
 }
 
-function checkUrlInPasswords(currentUrl: string, passwords: PasswordEntry[]): boolean {
-    // Normalize the current URL
-    const normalizedCurrentUrl = new URL(currentUrl).origin;
-    
-    // Check if any password entry matches the current URL
-    return passwords.some(entry => {
-      const entryUrl = new URL(entry.site).origin;
-      return normalizedCurrentUrl === entryUrl;
-    });
-  }
-
-
-
-// Properly typed form field handler with debouncing
-let focusTimeout: NodeJS.Timeout;
 
 
 function handleFocus(event: FocusEvent) {
@@ -103,20 +188,19 @@ function handleFocus(event: FocusEvent) {
       };
 
       // Check if URL exists in passwords
-      const urlExists = checkUrlInPasswords(currentUrl, samplePasswords);
-      console.log(`Website credentials ${urlExists ? 'present' : 'not present'} in vault`);
+   
 
       // Fire and forget - don't wait for response
       sendMessageToBackground({
         type: "FORM_FIELD_FOCUSED",
         data: {
           ...formData,
-          credentialsExist: urlExists
         },
       }).catch(console.error);
     }
   }, 100);
 }
+
 
 // Initialize listeners with cleanup
 function initializeListeners() {
@@ -131,69 +215,55 @@ function initializeListeners() {
   });
 }
 
-chrome.runtime.onMessage.addListener((message) => {
+chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+ 
+
+  try {
     if (message.type === "FILL_FORM") {
       const currentUrl = window.location.href;
+     
+      
       const urlExists = checkUrlInPasswords(currentUrl, samplePasswords);
-  
-      if (urlExists) {
-        // Find matching password entry
-        const matchingEntry = samplePasswords.find(entry => {
-          const entryUrl = new URL(entry.site).origin;
-          const currentOrigin = new URL(currentUrl).origin;
-          return entryUrl === currentOrigin;
+      
+
+      if (!urlExists) {
+
+        sendResponse({ 
+          success: false,
+          message: "No credentials found for this site"
         });
-  
-        if (matchingEntry) {
-          fillFormFields({
-            username: matchingEntry.username,
-            password: matchingEntry.password
-          });
-          console.log('Credentials filled for:', currentUrl);
-        }
-      } else {
-        console.log('No saved credentials found for:', currentUrl);
+        return true;
+      }
+
+      const matchingEntry = samplePasswords.find(entry => {
+        const entryUrl = new URL(entry.site).origin;
+        const currentOrigin = new URL(currentUrl).origin;
+        return entryUrl === currentOrigin;
+      });
+
+      if (matchingEntry) {
+        console.log("DEBUG: Found matching entry:", matchingEntry);
+        
+        const { usernameField, passwordField } = fillFormFields(message.data);
+
+        sendResponse({ 
+          success: true,
+          fieldsFound: {
+            username: !!usernameField,
+            password: !!passwordField
+          }
+        });
       }
     }
-    return true; // Keep the message channel open for async response
-  });
-  
-  function fillFormFields(credentials: { username: string; password: string }) {
-    console.log('Filling form fields...');
-    
-    // Cast NodeList to Array and filter for input elements
-    const inputs: HTMLInputElement[] = Array.from(document.querySelectorAll('input'))
-        .filter((el): el is HTMLInputElement => el instanceof HTMLInputElement);
-    
-    // Find username/email field
-    const usernameField = inputs.find(input => {
-        const inputType = input.type.toLowerCase();
-        const inputName = (input.name || input.id).toLowerCase();
-        return inputType === 'email' || 
-               inputType === 'text' || 
-               inputName.includes('username') || 
-               inputName.includes('email');
+  } catch (error) {
+    console.error("DEBUG: Error in message listener:", error);
+    sendResponse({ 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Unknown error'
     });
-    
-    // Find password field
-    const passwordField = inputs.find(input => 
-        input.type.toLowerCase() === 'password'
-    );
-  
-    // Fill username if found
-    if (usernameField) {
-        usernameField.value = credentials.username;
-        usernameField.dispatchEvent(new Event('input', { bubbles: true }));
-        console.log('Username field filled');
-    }
-  
-    // Fill password if found
-    if (passwordField) {
-        passwordField.value = credentials.password;
-        passwordField.dispatchEvent(new Event('input', { bubbles: true }));
-        console.log('Password field filled');
-    }
-}
+  }
 
-// Start the listeners
+  return true; // Keep the message port open
+});
+
 initializeListeners();

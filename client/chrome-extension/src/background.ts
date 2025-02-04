@@ -1,19 +1,26 @@
 import type { ExtensionMessage } from './types/messages';
-
+// import { samplePasswords } from './contentScript';
 // Listen for form field focus events from content script
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+
   if (message.type === 'FORM_FIELD_FOCUSED') {
     const tabId = sender.tab?.id;
-    if (!tabId) {
+    const currentUrl = sender.tab?.url;
+    if (!tabId || !currentUrl) {
       sendResponse({ success: false });
       return;
     }
-
+    
+    
+    
     // Update the extension icon to indicate a form is detected
     chrome.action.setBadgeText({
       text: '✓',
       tabId: tabId
     });
+
+
+
 
     chrome.action.openPopup();
     
@@ -35,6 +42,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true; // Will respond asynchronously
   }
 });
+
+
 
 // Handle login success message from main website
 chrome.runtime.onMessageExternal.addListener((request: ExtensionMessage) => {
