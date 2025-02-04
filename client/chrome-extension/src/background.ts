@@ -1,19 +1,24 @@
 import type { ExtensionMessage } from './types/messages';
 
 // Listen for form field focus events from content script
-chrome.runtime.onMessage.addListener((message, sender) => {
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'FORM_FIELD_FOCUSED') {
     const tabId = sender.tab?.id;
-    if (!tabId) return;
+    if (!tabId) {
+      sendResponse({ success: false });
+      return;
+    }
 
     // Update the extension icon to indicate a form is detected
     chrome.action.setBadgeText({
       text: '✓',
       tabId: tabId
     });
+
+    chrome.action.openPopup();
     
     chrome.action.setBadgeBackgroundColor({
-      color: '#7C3AED', // Purple color to match your theme
+      color: '#7C3AED',
       tabId: tabId
     });
 
@@ -23,7 +28,11 @@ chrome.runtime.onMessage.addListener((message, sender) => {
         ...message.data,
         tabId
       }
+    }, () => {
+      sendResponse({ success: true });
     });
+
+    return true; // Will respond asynchronously
   }
 });
 
