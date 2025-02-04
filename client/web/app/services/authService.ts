@@ -1,4 +1,6 @@
+import { getToken } from '~/utils/authUtils';
 import api from '../utils/api';
+import axios from 'axios';
 
 // Send OTP to email
 export const sendOTP = async (email: string) => {
@@ -43,11 +45,24 @@ export const signup = async (userData: { fullName: string; email: string; master
 };
 
 // Save biometric data
-export const saveBiometricData = async (type: string, data: any) => {
+export const saveBiometricData = async (formData: FormData) => {
   try {
-    const response = await api.post(`/auth/biometrics/${type}`, data);
+    console.log("formData in save bio data: ", formData);
+    const token = getToken();
+
+    console.log("reached save bio data");
+    const response = await axios.post(`http://localhost:3000/auth/biometrics/${formData.get('type')}`, formData, 
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+    console.log("response in save bio data: ", response);
     return response.data;
   } catch (error) {
+    console.error("Error in save bio data:", error);
     throw error;
   }
 };

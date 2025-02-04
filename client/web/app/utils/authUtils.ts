@@ -1,12 +1,13 @@
 // Get JWT token from localStorage
 export const getToken = () => {
-  if (typeof localStorage !== 'undefined') {
-    const token = localStorage.getItem('jwtToken');
-    console.log("token retrieved:", token);
-    return token;
+  if (typeof window !== "undefined" && typeof localStorage !== "undefined") {
+    console.log("token in gettoken: ", localStorage.getItem("jwtToken"));
+    
+    return localStorage.getItem("jwtToken");
   }
   return null;
 };
+
 
 // Save JWT token to localStorage
 export const setToken = (token: string) => {

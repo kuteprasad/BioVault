@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState , useEffect} from 'react';
 import { useNavigate } from 'react-router';
 import { CheckCircle, ChevronDownIcon, ChevronUpIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import BiometricCapture from '../components/biometrics/BiometricCapture';
+import { saveBiometricData } from '~/services/authService';
 
 type BiometricType = 'fingerprint' | 'photo' | 'voice' | null;
 
@@ -27,9 +28,10 @@ const AddBiometrics = () => {
 
       console.log('Biometric data:', data.type);
       console.log('blob data', data.blob);
+      console.log('FormData:', formData);
 
       // Simulating backend upload (Replace with actual API call)
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await saveBiometricData(formData);
 
       // Add biometric type to state
       setAddedBiometrics((prev) => new Set(prev).add(data.type));
