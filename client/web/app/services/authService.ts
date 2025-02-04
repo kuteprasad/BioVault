@@ -5,8 +5,8 @@ export const sendOTP = async (email: string) => {
   try {
     const response = await api.post('/auth/send-otp', { email });
     return response.data;
-  } catch (error) {
-    throw error;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || 'Failed to send OTP');
   }
 };
 
@@ -15,37 +15,30 @@ export const verifyOTP = async (email: string, otp: string) => {
   try {
     const response = await api.post('/auth/verify-otp', { email, otp });
     return response.data; // JWT token returned after successful verification
-  } catch (error) {
-    throw error;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || 'Failed to verify OTP');
   }
 };
 
 // User login with email and password
-export const login = async (email: string, password: string) => {
+export const login = async (email: string, masterPassword: string) => {
   try {
-    const response = await api.post('/auth/login', { email, password });
+    const response = await api.post('/auth/login', { email, masterPassword });
     return response.data; // JWT token returned after successful login
-  } catch (error) {
-    throw error;
+  } catch (error: any) {
+    console.log("error in login: ", error);
+    throw new Error(error.response?.data?.message || 'Login failed');
   }
 };
 
 // User signup
 export const signup = async (userData: { fullName: string; email: string; masterPassword: string }) => {
   try {
+    console.log("userData", userData);
     const response = await api.post('/auth/signup', userData);
     return response.data;
-  } catch (error) {
-    throw error;
-  }
-};
-
-export const checkUserExists = async (email: string) => {
-  try {
-    const response = await api.get(`/auth/check-user?email=${email}`);
-    return response.data;
-  } catch (error) {
-    throw error;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || 'Signup failed');
   }
 };
 

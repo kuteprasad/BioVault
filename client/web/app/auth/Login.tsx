@@ -54,10 +54,12 @@ const Login: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("formData", formData);
     dispatch(loginUser({ email: formData.email, masterPassword: formData.masterPassword }) as any)
       .unwrap()
       .then((data : any) => {
-        setToken(data.token);
+        console.log("data in login: ", data);
+        // setToken(data.token);
         navigate('/');
       })
       .catch((error : any) => {
@@ -136,6 +138,7 @@ const Login: React.FC = () => {
                 disabled={!isOtpSent}
               />
               <button
+                type='button'
                 onClick={handleSendOTP}
                 disabled={isOtpSent}
                 className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors duration-200 disabled:opacity-50"

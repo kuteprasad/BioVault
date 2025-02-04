@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
-import { signup, checkUserExists, login as apiLogin } from '../services/authService';
+import { signup, login as apiLogin } from '../services/authService';
+import { getToken, setToken, removeToken } from '../utils/authUtils';
 
 interface AuthState {
   token: string | null;
@@ -22,8 +23,8 @@ interface LoginData {
 }
 
 const initialState: AuthState = {
-  token: null,
-  isAuthenticated: false,
+  token: typeof window !== 'undefined' ? getToken() : null,
+  isAuthenticated: typeof window !== 'undefined' ? !!getToken() : false,
   loading: false,
   error: null,
   userData: null,
@@ -33,13 +34,10 @@ export const signupUser = createAsyncThunk(
   'auth/signup',
   async (userData: SignupData, { rejectWithValue }) => {
     try {
-      const userExists = await checkUserExists(userData.email);
-      if (userExists.data.exists) {
-        return rejectWithValue('User already exists');
-      }
       const response = await signup(userData);
       return response.data;
     } catch (error: any) {
+      console.log("error in signup thunk: ", error);
       if (error.response && error.response.data) {
         return rejectWithValue(error.response.data);
       }
@@ -53,8 +51,10 @@ export const loginUser = createAsyncThunk(
   async (loginData: LoginData, { rejectWithValue }) => {
     try {
       const response = await apiLogin(loginData.email, loginData.masterPassword);
-      return response.data;
+      console.log("response in login thunk: ", response);
+      return response;
     } catch (error: any) {
+      console.log("error in login thunk: ", error);
       if (error.response && error.response.data) {
         return rejectWithValue(error.response.data);
       }
@@ -71,11 +71,13 @@ const authSlice = createSlice({
       state.token = action.payload.token;
       state.isAuthenticated = true;
       state.userData = action.payload.userData;
+      setToken(action.payload.token);
     },
     logout: (state) => {
       state.token = null;
       state.isAuthenticated = false;
       state.userData = null;
+      removeToken();
     },
   },
   extraReducers: (builder) => {
@@ -101,6 +103,7 @@ const authSlice = createSlice({
         state.token = action.payload.token;
         state.isAuthenticated = true;
         state.userData = action.payload.userData;
+        setToken(action.payload.token);
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
