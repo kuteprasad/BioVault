@@ -26,19 +26,7 @@ const verifyOTP = async (req, res) => {
   }
 };
 
-const checkUser = async (req, res) => {
-  const { email } = req.query;
 
-  try {
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-    res.status(200).json({ message: 'User exists' });
-  } catch (error) {
-    res.status(500).json({ message: 'Error checking user', error });
-  }
-};
 
 const signup = async (req, res) => {
   const { fullName, email, masterPassword } = req.body;
@@ -75,4 +63,4 @@ const login = async (req, res) => {
   }
 };
 
-export { sendOTP, verifyOTP, signup, login, checkUser };
+export { sendOTP, verifyOTP, signup, login };

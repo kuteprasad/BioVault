@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
-import { signup, checkUserExists, login as apiLogin } from '../services/authService';
+import { signup, login as apiLogin } from '../services/authService';
 
 interface AuthState {
   token: string | null;
@@ -33,10 +33,6 @@ export const signupUser = createAsyncThunk(
   'auth/signup',
   async (userData: SignupData, { rejectWithValue }) => {
     try {
-      const userExists = await checkUserExists(userData.email);
-      if (userExists.data.exists) {
-        return rejectWithValue('User already exists');
-      }
       const response = await signup(userData);
       return response.data;
     } catch (error: any) {

@@ -41,16 +41,6 @@ export const signup = async (userData: { fullName: string; email: string; master
   }
 };
 
-export const checkUserExists = async (email: string) => {
-  try {
-    console.log("email", email);
-    const response = await api.get(`/auth/check-user?email=${email}`);
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
-};
-
 // Save biometric data
 export const saveBiometricData = async (type: string, data: any) => {
   try {
