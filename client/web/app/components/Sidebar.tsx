@@ -11,17 +11,26 @@ import {
   ChevronRight,
   ChevronLeft,
 } from "lucide-react";
-import { BioVaultLogo } from "./BioVaultLogo";
 
 const Sidebar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(true);
+
+  const getLinkStyles = ({ isActive }: { isActive: boolean }) => {
+    return `flex items-center ${isOpen ? "px-4" : "justify-center px-2"} py-4
+    ${isActive ? "bg-purple-50 text-purple-700" : "text-gray-700 hover:bg-purple-50"}
+    transition-colors duration-200`;
+  };
+
+  const getIconStyles = ({ isActive }: { isActive: boolean }) => {
+    return `flex-shrink-0 ${isActive ? "text-purple-700" : "text-purple-600"}`;
+  };
 
   const navItems = [
     { path: "/update-profile", icon: <User className="h-6 w-6" />, label: "Profile" },
     { path: "/", icon: <ShieldCheck className="h-6 w-6" />, label: "My Vault" },
     { path: "/settings", icon: <Settings className="h-6 w-6" />, label: "Settings" },
     { path: "/import-passwords", icon: <Lock className="h-6 w-6" />, label: "Passwords" },
-    { path: "/new", icon: <FilePlus className="h-6 w-6" />, label: "New Entry" },
+    // { path: "/new", icon: <FilePlus className="h-6 w-6" />, label: "New Entry" },
   ];
 
   return (
@@ -31,18 +40,19 @@ const Sidebar: React.FC = () => {
         className="absolute top-4 left-4 lg:hidden p-2 rounded-lg bg-purple-100 hover:bg-purple-200 transition"
         onClick={() => setIsOpen(!isOpen)}
       >
-        {isOpen ? 
-          <X className="h-6 w-6 text-purple-800" /> : 
+        {isOpen ? (
+          <X className="h-6 w-6 text-purple-800" />
+        ) : (
           <Menu className="h-6 w-6 text-purple-800" />
-        }
+        )}
       </button>
 
       {/* Expand/Collapse Button */}
       <button
-        className="absolute top-1/2 -right-4 transform -translate-y-1/2 
-          p-2 bg-purple-600 rounded-full shadow-lg hover:bg-purple-700 
-          transition-all duration-200 z-50 hidden lg:flex items-center 
-          justify-center group"
+        className="absolute top-1/2 -right-4 transform -translate-y-1/2
+        p-2 bg-purple-600 rounded-full shadow-lg hover:bg-purple-700
+        transition-all duration-200 z-50 hidden lg:flex items-center
+        justify-center group"
         onClick={() => setIsOpen(!isOpen)}
       >
         {isOpen ? (
@@ -51,10 +61,6 @@ const Sidebar: React.FC = () => {
           <ChevronRight className="h-5 w-5 text-white" />
         )}
       </button>
-{/* 
-      <div className="h-10">
-
-        </div> */}
 
       {/* Sidebar */}
       <nav className={`pt-15 ${
@@ -64,21 +70,9 @@ const Sidebar: React.FC = () => {
           <NavLink
             key={item.path}
             to={item.path}
-            className={({ isActive }: { isActive: boolean }) => 
-              `flex items-center 
-              ${isOpen ? "px-4" : "justify-center px-2"} 
-              py-4 
-              ${isActive 
-                ? "bg-purple-50 text-purple-700" 
-                : "text-gray-700 hover:bg-purple-50"
-              } 
-              transition-colors duration-200`
-            }
+            className={getLinkStyles}
           >
-            <div className={`flex-shrink-0 ${
-              ({ isActive }: { isActive: boolean }) => 
-                isActive ? "text-purple-700" : "text-purple-600"
-            }`}>
+            <div className={getIconStyles}>
               {item.icon}
             </div>
             {isOpen && (

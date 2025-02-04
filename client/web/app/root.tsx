@@ -1,6 +1,7 @@
 import { Provider } from 'react-redux';
 import store from './redux/store';
 import { Toaster } from 'sonner';
+import { AuthProvider } from "./context/AuthContext";
 
 import {
   isRouteErrorResponse,
@@ -16,7 +17,6 @@ import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 
 import type { Route } from "./+types/root";
 import "./app.css";
-import { AuthProvider } from "./context/AuthContext";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -53,6 +53,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 export default function App() {
   return (
     <Provider store={store}>
+   
       <AuthProvider>
       <Toaster 
           position="top-right" 
@@ -62,6 +63,7 @@ export default function App() {
         />
         <Outlet />
       </AuthProvider>
+     
     </Provider>
   );
 }

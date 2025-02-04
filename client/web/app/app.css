@@ -1,27 +1,61 @@
 @import "tailwindcss";
 
-:root {
-  --color-primary: theme('colors.purple.600');
-  --color-primary-hover: theme('colors.purple.700');
-  --color-text-primary: theme('colors.gray.900');
-  --color-text-secondary: theme('colors.gray.600');
-  --gradient-from: theme('colors.purple.50');
-  --gradient-to: theme('colors.white');
-}
+@layer base {
+  :root {
+    --color-primary: theme('colors.purple.600');
+    --color-primary-hover: theme('colors.purple.700');
+    --color-primary-light: theme('colors.purple.50');
+    --bg-primary: theme('colors.white');
+    --bg-secondary: theme('colors.gray.50');
+    --text-primary: theme('colors.gray.900');
+    --text-secondary: theme('colors.gray.600');
+  }
 
-/* Global styles */
-.gradient-background {
-  @apply bg-gradient-to-br from-purple-50 to-white;
+  :root[data-theme='blue'] {
+    --color-primary: theme('colors.blue.600');
+    --color-primary-hover: theme('colors.blue.700');
+    --color-primary-light: theme('colors.blue.50');
+  }
+
+  :root[data-theme='green'] {
+    --color-primary: theme('colors.green.600');
+    --color-primary-hover: theme('colors.green.700');
+    --color-primary-light: theme('colors.green.50');
+  }
+
+  :root[data-theme='red'] {
+    --color-primary: theme('colors.red.600');
+    --color-primary-hover: theme('colors.red.700');
+    --color-primary-light: theme('colors.red.50');
+  }
+
+  :root.dark {
+    --bg-primary: theme('colors.gray.900');
+    --bg-secondary: theme('colors.gray.800');
+    --text-primary: theme('colors.gray.100');
+    --text-secondary: theme('colors.gray.300');
+  }
 }
 
 .btn-primary {
-  @apply px-4 py-2 bg-purple-600 text-white rounded-lg 
-    hover:bg-purple-700 transition-colors duration-200 
-    disabled:opacity-50;
+  @apply px-4 py-2 rounded-lg transition-colors duration-200;
+  background-color: var(--color-primary);
+  color: white;
 }
 
-.input-primary {
-  @apply w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg 
-    focus:ring-2 focus:ring-purple-500 focus:border-purple-500 
-    outline-none transition-all text-gray-900 bg-white;
+.btn-primary:hover {
+  background-color: var(--color-primary-hover);
+}
+
+.theme-container {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.theme-text {
+  color: var(--text-primary);
+}
+
+.theme-text-secondary {
+  color: var(--text-secondary);
 }
