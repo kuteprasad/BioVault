@@ -15,7 +15,8 @@ export default defineConfig({
     outDir: 'dist',
     rollupOptions: {
       input: {
-        background: 'src/background.ts'
+        background: 'src/background.ts',
+        contentScript: 'src/contentScript.ts'
       },
       output: {
         entryFileNames: 'assets/[name].js',
