@@ -28,6 +28,7 @@
     "concurrently": "^8.2.2"
   },
   "dependencies": {
+    "bcrypt": "^5.1.1",
     "biovault": "file:"
   }
 }
