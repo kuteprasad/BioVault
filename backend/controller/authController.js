@@ -1,10 +1,10 @@
 import User from '../models/User.js';
-import BiometricData from '../models/BiometricData.js';
+
 import jwt from 'jsonwebtoken';
 import { sendEmail } from '../utils/sendEmail.js';
 import dotenv from 'dotenv';
 import bcrypt from 'bcrypt';
-import cloudinary from '../config/cloudinary.js';
+
 
 dotenv.config();
 
@@ -94,94 +94,10 @@ const login = async (req, res) => {
   }
 };
 
-const handlePhotoUpload = async (file) => {
-  const uploadResult = await new Promise((resolve, reject) => {
-    cloudinary.uploader.upload_stream(
-      { resource_type: 'image', folder: 'biometrics/face' },
-      (error, result) => {
-        if (error) reject(error);
-        else resolve(result);
-      }
-    ).end(file.buffer);
-  });
 
-  return {
-    face: {
-      cloudinaryId: uploadResult.public_id,
-      metadata: {
-        resolution: `${uploadResult.width}x${uploadResult.height}`,
-        format: uploadResult.format
-      }
-    }
-  };
+export { 
+  sendOTP, 
+  verifyOTP, 
+  signup, 
+  login
 };
-
-const handleVoiceUpload = async (file) => {
-  const uploadResult = await new Promise((resolve, reject) => {
-    cloudinary.uploader.upload_stream(
-      { resource_type: 'video', folder: 'biometrics/voice' },
-      (error, result) => {
-        if (error) reject(error);
-        else resolve(result);
-      }
-    ).end(file.buffer);
-  });
-
-  return {
-    voice: {
-      cloudinaryId: uploadResult.public_id,
-      metadata: {
-        length: `${uploadResult.duration}s`,
-        format: uploadResult.format
-      }
-    }
-  };
-};
-
-const handleFingerprintUpload = async (file, userId) => {
-  return {
-    fingerprint: {
-      webauthnId: `webauthn_${userId}`,
-      publicKey: file.buffer.toString('base64')
-    }
-  };
-};
-
-const saveBiometricData = async (req, res) => {
-  const { type } = req.params;
-  const file = req.file;
-  const userId = req.user.userId;
-
-  try {
-    let updateData;
-    
-    switch(type) {
-      case 'photo':
-        updateData = await handlePhotoUpload(file);
-        break;
-      case 'voice':
-        updateData = await handleVoiceUpload(file);
-        break;
-      case 'fingerprint':
-        updateData = await handleFingerprintUpload(file, userId);
-        break;
-      default:
-        return res.status(400).json({ message: 'Invalid biometric type' });
-    }
-
-    const biometricData = await BiometricData.findOneAndUpdate(
-      { userId },
-      { $set: updateData },
-      { upsert: true, new: true }
-    );
-
-    console.log("Updated biometric data:", biometricData);
-    res.status(200).json({ message: 'Biometric data saved successfully' });
-    
-  } catch (error) {
-    console.error('Error in saveBiometricData:', error);
-    res.status(500).json({ message: 'Error saving biometric data', error: error.message });
-  }
-};
-
-export { sendOTP, verifyOTP, signup, login, saveBiometricData };

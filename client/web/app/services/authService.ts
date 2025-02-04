@@ -66,3 +66,25 @@ export const saveBiometricData = async (formData: FormData) => {
     throw error;
   }
 };
+
+export const matchBiometricData = async (formData: FormData) => {
+  try {
+    // console.log("formData in match bio data: ", formData);
+    const token = getToken();
+
+    console.log("reached match bio data");
+    const response = await axios.post(`http://localhost:3000/auth/biometrics/${formData.get('type')}/match`, formData, 
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+    console.log("response in match bio data: ", response);
+    return response;
+  } catch (error) {
+    console.error("Error in match bio data:", error);
+    throw error;
+  }
+};
