@@ -14,7 +14,6 @@ interface SignupData {
   fullName: string;
   email: string;
   masterPassword: string;
-
 }
 
 const initialState: AuthState = {
