@@ -24,7 +24,7 @@ const samplePasswords: PasswordEntry[] = [
   },
   {
     id: "2",
-    site: "https://netflix.com",
+    site: "https://circuitverse.org/users/sign_in",
     username: "netflixuser",
     password: "NetflixPass456!",
     notes: "Family Netflix account",

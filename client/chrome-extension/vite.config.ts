@@ -15,7 +15,6 @@ export default defineConfig({
     outDir: 'dist',
     rollupOptions: {
       input: {
-        contentScript: 'src/contentScript.ts',
         background: 'src/background.ts'
       },
       output: {
