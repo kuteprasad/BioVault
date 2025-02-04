@@ -49,7 +49,7 @@ const Login: React.FC = () => {
 
   const handleLogin = async () => {
     try {
-      const response = await verifyOTP(email, otp);
+      const response = await verifyOTP(formData.email, formData.otp);
       login(response.token);
       toast.success('Login successful!');
       // navigate('/home2');
