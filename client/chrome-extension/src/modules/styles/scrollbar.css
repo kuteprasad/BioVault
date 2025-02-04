@@ -1,0 +1,19 @@
+/* Custom Scrollbar */
+.scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: #e9d5ff;
+    border-radius: 3px;
+    transition: all 0.2s;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: #d8b4fe;
+  }
