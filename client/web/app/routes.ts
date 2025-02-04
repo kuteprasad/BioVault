@@ -23,6 +23,7 @@ export default [
             route("edit-password/:id", "./routes/home/EditPasswordForm.tsx"),
             route("update-profile", "./routes/home/updateProfile.tsx"),
             route("settings", "./routes/home/settings.tsx"),
+            route("match-biometrics", "./routes/home/matchBiometrics.tsx"),
             route("import-passwords", "./routes/home/importPasswords.tsx"),
         ]),
     ]),

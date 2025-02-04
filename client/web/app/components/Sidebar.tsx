@@ -30,7 +30,7 @@ const Sidebar: React.FC = () => {
     { path: "/", icon: <ShieldCheck className="h-6 w-6" />, label: "My Vault" },
     { path: "/settings", icon: <Settings className="h-6 w-6" />, label: "Settings" },
     { path: "/import-passwords", icon: <Lock className="h-6 w-6" />, label: "Passwords" },
-    // { path: "/new", icon: <FilePlus className="h-6 w-6" />, label: "New Entry" },
+    { path: "/match-biometrics", icon: <FilePlus className="h-6 w-6" />, label: "Match Biometrics" },
   ];
 
   return (

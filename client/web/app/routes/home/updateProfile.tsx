@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Mail, User, Lock, ChevronUp, ChevronDown, Fingerprint, Camera, Mic, LogOut } from 'lucide-react';
+import { User, ChevronUp, ChevronDown, Fingerprint, LogOut } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router';
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../../redux/store";
 import { logout } from "../../redux/authSlice";
-import BiometricCapture from '../../components/biometrics/BiometricCapture';
 import AddBiometrics from '../../auth/AddBiometrics';
 
 type Section = 'personal' | 'biometrics' | null;
