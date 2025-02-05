@@ -23,7 +23,7 @@ export interface ImportedPassword {
 }
 
 class PasswordService {
-  private baseUrl = '/vault';  
+  private baseUrl = '/password';  
 
   async getVault(): Promise<PasswordEntry[]> {
     try {
