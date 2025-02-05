@@ -74,24 +74,36 @@ export const updatePassword = async (req, res) => {
 };
 
 export const getVault = async (req, res) => {
-    const { userId } = req.body;
-  
-    try {
-      const user = await User.findById(userId);
-      if (!user) {
-        return res.status(404).json({ message: 'User not found' });
-      }
+  try {
+    // Get userId from auth middleware instead of body
+    const userId = req.user.userId;
+    console.log('Fetching vault for user:', userId);
 
-      const vault = await Vault.findOne({ userId }).populate('userId');
-      if (!vault) {
-        return res.status(404).json({ message: 'Vault not found' });
-      }
-  
-      res.status(200).json({ vault });
-    } catch (error) {
-      console.error('Error retriving passwords:', error);
-      res.status(500).json({ message: 'Error retrieving vault', error });
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
     }
+
+    const vault = await Vault.findOne({ userId });
+    if (!vault) {
+      console.log('No vault found, creating new vault');
+      // Create new vault if none exists
+      const encryptionKey = crypto.randomBytes(32).toString('hex');
+      const newVault = new Vault({ 
+        userId, 
+        passwords: [], 
+        encryption_key: encryptionKey 
+      });
+      await newVault.save();
+      return res.status(200).json({ vault: newVault });
+    }
+
+    console.log('Vault found with', vault.passwords.length, 'passwords');
+    res.status(200).json({ vault });
+  } catch (error) {
+    console.error('Error retrieving vault:', error);
+    res.status(500).json({ message: 'Error retrieving vault', error: error.message });
+  }
 };
   
 export const deletePassword = async (req, res) => {
