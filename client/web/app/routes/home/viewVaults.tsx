@@ -5,38 +5,6 @@ import { toast } from 'sonner';
 import PasswordService from '../../services/passwordService';
 import type { PasswordEntry } from '../../services/passwordService';
 
-// Sample data for development
-const samplePasswords: PasswordEntry[] = [
-  {
-    _id: '1',
-    site: 'https://github.com',
-    username: 'devuser123',
-    passwordEncrypted: 'SecurePass123!',
-    notes: 'GitHub personal account',
-    createdAt: new Date('2024-03-15').toISOString(),
-    updatedAt: new Date('2024-03-15').toISOString()
-    // updatedAt: new Date('2024-03-15').toISOString()
-  },
-  {
-    _id: '2',
-    site: 'https://netflix.com',
-    username: 'netflixuser',
-    passwordEncrypted: 'NetflixPass456!',
-    notes: 'Family Netflix account',
-    createdAt: new Date('2024-03-14').toISOString(),
-    updatedAt: new Date('2024-03-14').toISOString()
-  },
-  {
-    _id: '3',
-    site: 'https://amazon.com',
-    username: 'shopper789',
-    passwordEncrypted: 'AmazonShop789!',
-    notes: 'Prime shopping account',
-    createdAt: new Date('2024-03-13').toISOString(),
-    updatedAt: new Date('2024-03-13').toISOString()
-  }
-];
-
 export default function ViewVaults() {
   const [passwords, setPasswords] = useState<PasswordEntry[]>([]);
   const [visiblePasswordId, setVisiblePasswordId] = useState<string | null>(null);
@@ -75,6 +43,7 @@ export default function ViewVaults() {
     const confirmed = window.confirm('Are you sure you want to delete this password entry?');
     if (confirmed) {
       try {
+        console.log('Deleting password:', id);
         await PasswordService.deletePassword(id);
         // Remove the deleted entry from local state
         setPasswords(prev => prev.filter(p => p._id !== id));
@@ -108,29 +77,29 @@ export default function ViewVaults() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-6 space-y-6 bg-gray-50 min-h-screen">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">My Password Vault</h1>
-        <button
-          onClick={() => navigate('/new-password')}
-          className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white 
-            rounded-lg hover:bg-purple-700 transition-colors duration-200 shadow-md hover:shadow-lg"
-        >
-          <Plus className="h-5 w-5" />
-          Add New Password
-        </button>
-      </div>
+    <div className="h-[550px] flex flex-col space-y-6">
+    <div className="flex items-center justify-between">
+      <h1 className="text-3xl font-bold text-gray-900">My Password Vault</h1>
+      <button
+        onClick={() => navigate('/new-password')}
+        className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white 
+          rounded-lg hover:bg-purple-700 transition-colors duration-200 shadow-md hover:shadow-lg"
+      >
+        <Plus className="h-5 w-5" />
+        Add New Password
+      </button>
+    </div>
 
-      {passwords.length === 0 ? (
-        <div className="text-center py-12 bg-white rounded-2xl shadow-xl">
-          <p className="text-gray-500 text-lg">
-            No passwords saved yet. Add your first password!
-          </p>
-        </div>
+    {passwords.length === 0 ? (
+    <div className="text-center py-12 bg-white rounded-2xl shadow-xl">
+      <p className="text-gray-500 text-lg">
+        No passwords saved yet. Add your first password!
+      </p>
+    </div>
       ) : (
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-200">
-          <div className="overflow-x-auto">
-            <table className="min-w-full">
+        <div className="flex-1 bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
+        <div className="h-full overflow-auto">
+          <table className="min-w-full">
               <thead className="bg-purple-50 border-b border-gray-200">
                 <tr>
                   {['Site', 'Username', 'Password', 'Notes', 'Last Updated', 'Actions'].map((header) => (
