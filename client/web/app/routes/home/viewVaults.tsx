@@ -174,7 +174,7 @@ export default function ViewVaults() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-2">
                         <span className="text-sm text-gray-900">
-                          {visiblePasswords.has(password._id!) 
+                          {visiblePasswordId == password._id!
                             ? password.passwordEncrypted
                             : '••••••••'}
                         </span>
@@ -182,9 +182,9 @@ export default function ViewVaults() {
                           <button
                             onClick={() => togglePasswordVisibility(password._id!)}
                             className="text-gray-400 hover:text-purple-600"
-                            title={visiblePasswords.has(password._id!) ? 'Hide Password' : 'Show Password'}
+                            title={visiblePasswordId == password._id! ? 'Hide Password' : 'Show Password'}
                           >
-                            {visiblePasswords.has(password._id!) 
+                            {visiblePasswordId == password._id! 
                               ? <EyeOff className="h-4 w-4" />
                               : <Eye className="h-4 w-4" />}
                           </button>
