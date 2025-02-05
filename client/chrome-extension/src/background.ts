@@ -39,8 +39,6 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
         return true;
       }
 
-
-      
         try {
           // Update the extension icon
           await chrome.action.setBadgeText({
