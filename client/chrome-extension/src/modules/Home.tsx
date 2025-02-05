@@ -118,6 +118,25 @@ const Home: FC = () => {
     });
   };
 
+  const handleAuthBeforeFill = async (password: PasswordEntry) => {
+    try {
+      // This is where we'll add the authentication API call later
+      console.log("Initiating auth before fill for:", password.site);
+      
+      // For now, just show a temporary message
+      // Later this will be replaced with actual biometric authentication
+      const confirmAuth = window.confirm("Authenticate to fill password?");
+      
+      if (confirmAuth) {
+        // Proceed with filling password after successful authentication
+        handleFillPassword(password);
+      }
+    } catch (error) {
+      console.error("Authentication failed:", error);
+      // We can add proper error handling here later
+    }
+  };
+
   const handlePasswordOptionChange = (key: keyof PasswordOptions) => {
     setPasswordOptions((prev) => ({
       ...prev,
@@ -293,17 +312,18 @@ const Home: FC = () => {
                             )}
                           </button>
                           <button
-                            onClick={() => handleFillPassword(password)}
-                            className="p-1.5 rounded-lg hover:bg-purple-100 
-              transition-all duration-300"
-                            title="Fill form"
-                          >
-                            <img
-                              src="/icons/fill.svg"
-                              alt="Fill"
-                              className="w-3.5 h-3.5 opacity-70 group-hover:opacity-100"
-                            />
-                          </button>
+  onClick={() => handleAuthBeforeFill(password)}
+  className="px-2 py-1 rounded-lg bg-purple-600 hover:bg-purple-700 
+    transition-all duration-300 flex items-center gap-1 group"
+  title="Authenticate & Fill"
+>
+  <img
+    src="/icons/lock.svg" // You'll need to add this icon
+    alt="Authenticate"
+    className="w-3.5 h-3.5 text-white"
+  />
+  <span className="text-xs text-white font-medium">Fill</span>
+</button>
                         </div>
                       </div>
                     ))
@@ -318,17 +338,6 @@ const Home: FC = () => {
           </div>
         )}
 
-        {/* Biometric Auth */}
-        {/* <div className="mt-6 mb-4">
-          <button className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white py-3.5 rounded-xl hover:opacity-95 transition-all duration-300 shadow-lg active:scale-[0.99] group">
-            <img
-              src="/icons/fingerprint.svg"
-              alt="Fingerprint"
-              className="w-5 h-5 group-hover:scale-110 transition-transform"
-            />
-            <span className="font-medium">Authenticate with Biometrics</span>
-          </button>
-        </div> */}
 
         {/* Generate Password Button */}
         <GeneratePassword
