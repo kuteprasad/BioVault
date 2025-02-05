@@ -14,10 +14,11 @@ router.use((req, res, next) => {
 router.use(authMiddleware);
 
 // Vault routes
-router.post('/add-password', addPassword);
-router.put('/update-password/:passwordId', updatePassword);
-router.get('/get-vault', getVault);
-router.delete('/delete-password/:passwordId', deletePassword);
-router.post('/import-passwords', saveImportedPasswords);
+router.post('/add', addPassword);
+router.put('/update/:passwordId', updatePassword);
+router.get('/vault', getVault);
+router.delete('/delete/:passwordId', deletePassword);
+router.post('/import', saveImportedPasswords);
+
 
 export default router; 

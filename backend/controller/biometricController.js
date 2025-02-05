@@ -2,8 +2,13 @@ import BiometricData from '../models/BiometricData.js';
 import dotenv from 'dotenv';
 import cloudinary from '../config/cloudinary.js';
 import { calculateMatchPercentage } from '../services/biometricServices.js';
+import axios from 'axios';
+import { createCanvas, Image, loadImage } from 'canvas';
+import * as faceapi from 'face-api.js';
 
 dotenv.config();
+
+
 
 const handlePhotoUpload = async (file) => {
     console.log("Uploading photo to Cloudinary...");
@@ -116,6 +121,25 @@ const saveBiometricData = async (req, res) => {
     }
 };
 
+
+
+const convertToImage = async (data, isUrl = false) => {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        
+        img.onerror = reject;
+        img.onload = () => resolve(img);
+        
+        if (isUrl) {
+            img.src = data;
+        } else {
+            // Convert buffer to base64
+            const base64 = Buffer.from(data).toString('base64');
+            img.src = `data:image/jpeg;base64,${base64}`;
+        }
+    });
+};
+
 const getBiometricData = async (userId, type) => {
 
     console.log(`Fetching stored ${type} biometric data for user:`, userId);
@@ -123,13 +147,90 @@ const getBiometricData = async (userId, type) => {
     const storedData = await BiometricData.findOne({ userId });
     if (!storedData) {
         const error = new Error('No biometric data found for user');
-        error.statusCode = 404; 
+        error.statusCode = 404;
         throw error;
     }
 
     console.log("Stored biometric data found:", storedData);
-    return storedData;
+    return storedData[type === 'photo' ? 'face' : type];
 }
+
+const createCanvasFromImage = async (imageData, isUrl = false) => {
+    try {
+        const img = await loadImage(isUrl ? imageData : `data:image/jpeg;base64,${imageData.toString('base64')}`);
+        const canvas = createCanvas(img.width, img.height);
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        return canvas;
+    } catch (error) {
+        console.error('Error creating canvas:', error);
+        throw new Error('Failed to create canvas from image');
+    }
+};
+
+const convertUrlToFile = async (url, type) => {
+    if (type === 'photo') {
+        return await createCanvasFromImage(url, true);
+    }
+    try {
+
+        if (type === 'photo') {
+            const image = await convertToImage(url, true);
+            return {
+                image,
+                type: 'image/jpeg',
+                name: 'stored.jpg'
+            };
+        }
+
+        const response = await axios.get(url, { responseType: 'arraybuffer' });
+        const buffer = Buffer.from(response.data);
+
+        return {
+            buffer,
+            type:  'audio/webm',
+            name:  'stored.webm'
+        };
+
+    } catch (error) {
+        console.error('Error converting URL to file:', error);
+        throw new Error(`Failed to convert ${type} URL to file`);
+    }
+};
+
+const prepareFileForMatching = async (file, type) => {
+    if (type === 'photo') {
+        return await createCanvasFromImage(file.buffer);
+    }
+    switch (type) {
+        case 'photo':
+            const image = await convertToImage(file.buffer);
+            return {
+                image,
+                type: 'image/jpeg',
+                name: 'photo.jpg'
+            };
+        case 'voice':
+            return {
+                buffer: file.buffer,
+                type: 'audio/webm',
+                name: 'voice.webm'
+            };
+
+        default:
+            throw new Error('Invalid biometric type');
+    }
+};
+
+const convertPublicKeyToBuffer = (publicKey) => {
+    try {
+        // Convert base64 string to buffer
+        return Buffer.from(publicKey, 'base64');
+    } catch (error) {
+        console.error('Error converting public key to buffer:', error);
+        throw new Error('Failed to convert public key');
+    }
+};
 
 const matchBiometricData = async (req, res) => {
     const { type } = req.params;
@@ -142,38 +243,36 @@ const matchBiometricData = async (req, res) => {
     console.log("File:", file);
 
     try {
+
         const storedBiometric = await getBiometricData(userId, type);
         console.log("Retrieved stored biometric data:", storedBiometric);
 
-        let uploadedData;
-        // const myFile = new File([file], 'image.jpeg', {
-        //     type: myBlob.type,
-        // });
-        
-        console.log(myFile);
-        // logs: File { name: "image.jpeg", lastModified: ..., size: 1024, type: "image/jpeg" }
-        // switch (type) {
-        //     case 'photo':
-        //         uploadedData = await handlePhotoUpload(file);
-        //         break;
-        //     case 'voice':
-        //         uploadedData = await handleVoiceUpload(file);
-        //         break;
-        //     case 'fingerprint':
-        //         uploadedData = await handleFingerprintUpload(file, userId);
-        //         break;
-        //     default:
-        //         return res.status(400).json({ message: 'Invalid biometric type' });
-        // }
-        // console.log("Uploaded new biometric data:", uploadedData);
+        let matchPercentage;
 
-        const matchPercentage = await calculateMatchPercentage(storedBiometric, uploadedData, type);
+        if (type !== 'fingerprint') {
+            const storedFile = await convertUrlToFile(storedBiometric.cloudinaryUrl, type);
+            // console.log("Converted stored URL to file:", storedFile);
+
+            // Prepare file for matching
+            const preparedFile = await prepareFileForMatching(file, type);
+            // console.log("Prepared file for matching:", preparedFile);
+
+            matchPercentage = await calculateMatchPercentage(storedFile, preparedFile, type);
+
+        } else {
+            // Compare fingerprint data
+            const storedBuffer = convertPublicKeyToBuffer(storedBiometric.publicKey);
+
+            matchPercentage = await calculateMatchPercentage(storedBuffer, file.buffer, type);
+        }
+
         console.log("Calculated match percentage:", matchPercentage);
 
         res.status(200).json({
             matchPercentage,
             matched: matchPercentage >= 80
         });
+
     } catch (error) {
         console.error('Error in matchBiometricData:', error);
         res.status(500).json({

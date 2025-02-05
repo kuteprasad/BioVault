@@ -1,35 +1,39 @@
-import crypto from 'crypto';
+import {Jimp} from 'jimp';
+import pixelmatch from 'pixelmatch';
 
-// Simple Hamming distance function
-const hammingDistance = (str1, str2) => {
-    if (str1.length !== str2.length) return 0; // Avoid incorrect comparisons
-    let distance = 0;
-    for (let i = 0; i < str1.length; i++) {
-        if (str1[i] !== str2[i]) {
-            distance++;
-        }
-    }
-    return ((str1.length - distance) / str1.length) * 100; // Convert to percentage
-};
+export const compareFingerprints = async (storedFingerprint, uploadedFingerprint) => {
+  try {
+    // Read both fingerprint buffers as images
+    const stored = await Jimp.read(Buffer.from(storedFingerprint));
+    const uploaded = await Jimp.read(Buffer.from(uploadedFingerprint));
 
-// Fingerprint comparison function
-export const compareFingerprints = (storedFingerprint, uploadedFingerprint) => {
-    if (!storedFingerprint || !uploadedFingerprint) return 0;
+    // Ensure same dimensions
+    const width = stored.getWidth();
+    const height = stored.getHeight();
+    uploaded.resize(width, height);
 
-    try {
-        // Decode base64 fingerprints
-        const storedDecoded = Buffer.from(storedFingerprint, 'base64').toString('utf-8');
-        const uploadedDecoded = Buffer.from(uploadedFingerprint, 'base64').toString('utf-8');
+    // Get raw pixel data
+    const storedData = stored.bitmap.data;
+    const uploadedData = uploaded.bitmap.data;
 
-        // Simple hashing approach
-        const storedHash = crypto.createHash('sha256').update(storedDecoded).digest('hex');
-        const uploadedHash = crypto.createHash('sha256').update(uploadedDecoded).digest('hex');
+    // Compare images and get number of different pixels
+    const diffPixels = pixelmatch(
+      storedData,
+      uploadedData,
+      null,
+      width,
+      height,
+      { threshold: 0.1 }
+    );
 
-        // Calculate similarity using Hamming distance
-        return hammingDistance(storedHash, uploadedHash);
-        
-    } catch (error) {
-        console.error("Error comparing fingerprints:", error);
-        return 0;
-    }
+    // Calculate and return match percentage
+    const totalPixels = width * height;
+    const matchPercentage = 100 - ((diffPixels / totalPixels) * 100);
+    
+    return Math.min(100, Math.max(0, matchPercentage));
+
+  } catch (error) {
+    console.error('Fingerprint matching error:', error);
+    throw new Error('Fingerprint comparison failed');
+  }
 };

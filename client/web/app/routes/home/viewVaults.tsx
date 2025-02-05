@@ -8,37 +8,38 @@ import type { PasswordEntry } from '../../services/passwordService';
 // Sample data for development
 const samplePasswords: PasswordEntry[] = [
   {
-    id: '1',
+    _id: '1',
     site: 'https://github.com',
     username: 'devuser123',
-    password: 'SecurePass123!',
+    passwordEncrypted: 'SecurePass123!',
     notes: 'GitHub personal account',
-    created_at: new Date('2024-03-15').toISOString(),
-    updated_at: new Date('2024-03-15').toISOString()
+    createdAt: new Date('2024-03-15').toISOString(),
+    updatedAt: new Date('2024-03-15').toISOString()
+    // updatedAt: new Date('2024-03-15').toISOString()
   },
   {
-    id: '2',
+    _id: '2',
     site: 'https://netflix.com',
     username: 'netflixuser',
-    password: 'NetflixPass456!',
+    passwordEncrypted: 'NetflixPass456!',
     notes: 'Family Netflix account',
-    created_at: new Date('2024-03-14').toISOString(),
-    updated_at: new Date('2024-03-14').toISOString()
+    createdAt: new Date('2024-03-14').toISOString(),
+    updatedAt: new Date('2024-03-14').toISOString()
   },
   {
-    id: '3',
+    _id: '3',
     site: 'https://amazon.com',
     username: 'shopper789',
-    password: 'AmazonShop789!',
+    passwordEncrypted: 'AmazonShop789!',
     notes: 'Prime shopping account',
-    created_at: new Date('2024-03-13').toISOString(),
-    updated_at: new Date('2024-03-13').toISOString()
+    createdAt: new Date('2024-03-13').toISOString(),
+    updatedAt: new Date('2024-03-13').toISOString()
   }
 ];
 
 export default function ViewVaults() {
   const [passwords, setPasswords] = useState<PasswordEntry[]>([]);
-  const [visiblePasswords, setVisiblePasswords] = useState<Set<number>>(new Set());
+  const [visiblePasswords, setVisiblePasswords] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -47,27 +48,26 @@ export default function ViewVaults() {
   }, []);
 
   const fetchPasswords = async () => {
-    setIsLoading(true);
     try {
-      // Comment out actual API call
-      // const fetchedPasswords = await PasswordService.getAllPasswords();
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setPasswords(samplePasswords);
+      setIsLoading(true);
+      const fetchedPasswords = await PasswordService.getVault();
+      console.log('Fetched passwords:', fetchedPasswords);
+      setPasswords(fetchedPasswords);
     } catch (error) {
+      console.error('Error fetching passwords:', error);
       toast.error('Failed to fetch passwords');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const togglePasswordVisibility = (index: number) => {
+  const togglePasswordVisibility = (passwordId: string) => {
     setVisiblePasswords(prev => {
       const newSet = new Set(prev);
-      if (newSet.has(index)) {
-        newSet.delete(index);
+      if (newSet.has(passwordId)) {
+        newSet.delete(passwordId);
       } else {
-        newSet.add(index);
+        newSet.add(passwordId);
       }
       return newSet;
     });
@@ -81,11 +81,28 @@ export default function ViewVaults() {
   const handleDelete = async (id: string) => {
     const confirmed = window.confirm('Are you sure you want to delete this password entry?');
     if (confirmed) {
-      const success = await PasswordService.deletePassword(id);
-      if (success) {
+      try {
+        await PasswordService.deletePassword(id);
         // Remove the deleted entry from local state
-        setPasswords(prev => prev.filter(p => p.id !== id));
+        setPasswords(prev => prev.filter(p => p._id !== id));
+      } catch (error) {
+        console.error('Error deleting password:', error);
       }
+    }
+  };
+
+  // Helper function to format URL
+  const formatUrl = (url: string): string => {
+    try {
+      // Add https:// if no protocol is specified
+      if (!/^https?:\/\//i.test(url)) {
+        url = 'https://' + url;
+      }
+      const urlObject = new URL(url);
+      return urlObject.hostname;
+    } catch (error) {
+      console.log('Invalid URL:', url);
+      return url; // Return original string if URL is invalid
     }
   };
 
@@ -134,9 +151,9 @@ export default function ViewVaults() {
                 </tr>
               </thead>
               <tbody>
-                {passwords.map((password, index) => (
+                {passwords.map((password) => (
                   <tr 
-                    key={password.id} 
+                    key={password._id} 
                     className="hover:bg-purple-50 transition-colors duration-150 border-b border-gray-100 last:border-b-0"
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -146,7 +163,7 @@ export default function ViewVaults() {
                         rel="noopener noreferrer"
                         className="text-purple-600 hover:text-purple-800 flex items-center gap-2 font-medium group"
                       >
-                        {new URL(password.site).hostname}
+                        {formatUrl(password.site)}
                         <ExternalLink className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
                       </a>
                     </td>
@@ -165,17 +182,17 @@ export default function ViewVaults() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-2">
                         <span className="text-sm text-gray-900">
-                          {visiblePasswords.has(index) 
-                            ? password.password 
+                          {visiblePasswords.has(password.id) 
+                            ? password.passwordEncrypted 
                             : '••••••••'}
                         </span>
                         <div className="flex items-center gap-2">
                           <button
-                            onClick={() => togglePasswordVisibility(index)}
+                            onClick={() => togglePasswordVisibility(password.id)}
                             className="text-gray-400 hover:text-purple-600"
-                            title={visiblePasswords.has(index) ? 'Hide Password' : 'Show Password'}
+                            title={visiblePasswords.has(password.id) ? 'Hide Password' : 'Show Password'}
                           >
-                            {visiblePasswords.has(index) 
+                            {visiblePasswords.has(password.id) 
                               ? <EyeOff className="h-4 w-4" />
                               : <Eye className="h-4 w-4" />}
                           </button>
@@ -195,8 +212,8 @@ export default function ViewVaults() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                       <div className="flex items-center gap-1">
                         <Calendar className="h-4 w-4 text-purple-500" />
-                        {password.updated_at 
-                          ? new Date(password.updated_at).toLocaleDateString()
+                        {password.updatedAt 
+                          ? new Date(password.updatedAt).toLocaleDateString()
                           : 'N/A'}
                       </div>
                     </td>
