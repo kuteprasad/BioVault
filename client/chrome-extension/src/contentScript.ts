@@ -153,6 +153,17 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
         });
       // }
     }
+    if (message.type === 'CHECK_MEDIA_PERMISSIONS') {
+      navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+        .then(stream => {
+          stream.getTracks().forEach(track => track.stop());
+          sendResponse({ success: true });
+        })
+        .catch(error => {
+          sendResponse({ success: false, error: error.message });
+        });
+      return true; // Important: indicates we will send a response asynchronously
+    }
   } catch (error) {
     console.error("DEBUG: Error in message listener:", error);
     sendResponse({
@@ -163,15 +174,5 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 
   return true; // Keep the message port open
 });
-
-// Request camera and microphone access (delete if not needed for the extension)
-navigator.mediaDevices.getUserMedia({ audio: true, video: true })
-  .then(() => {
-    console.log("Access granted to camera and microphone");
-  })
-  .catch((err) => {
-    console.error("Access denied:", err);
-  });
-
 
 initializeListeners();

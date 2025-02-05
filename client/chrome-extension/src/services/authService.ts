@@ -16,7 +16,8 @@ export const matchBiometricData = async (formData: FormData) => {
         }
       );
       console.log("response in match bio data: ", response);
-      return response;
+      
+      return response.data;
     } catch (error) {
       console.error("Error in match bio data:", error);
       throw error;

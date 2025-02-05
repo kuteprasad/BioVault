@@ -36,7 +36,7 @@ export const BiometricAuth: FC<BiometricAuthProps> = ({
 
   return (
     <>
-      <div className="mt-3">
+      {/* <div className="mt-3">
         <button
           onClick={() => setShowBiometricAuth(!showBiometricAuth)}
           className="w-full flex items-center justify-center gap-3 p-3 rounded-xl 
@@ -48,7 +48,7 @@ export const BiometricAuth: FC<BiometricAuthProps> = ({
             Biometric Authentication
           </span>
         </button>
-      </div>
+      </div> */}
 
       {showBiometricAuth && (
         <div className="mt-3 overflow-hidden" style={{ animation: "slideUp 0.3s ease-out forwards" }}>

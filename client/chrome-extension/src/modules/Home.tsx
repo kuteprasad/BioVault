@@ -37,7 +37,7 @@ const Home: FC = () => {
 
   // Add new state after other states
   const [showBiometricAuth, setShowBiometricAuth] = useState(false);
-  const [pendingPassword, setPendingPassword] = useState<PasswordEntry | null>(null);
+  const [bioAuthResponse, setBioAuthResponse] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const showError = (message: string) => {
@@ -133,14 +133,16 @@ const Home: FC = () => {
 
   const handleAuthBeforeFill = async (password: PasswordEntry) => {
     try {
+
       // This is where we'll add the authentication API call later
       console.log("Initiating auth before fill for:", password.site);
-
+      
       // For now, just show a temporary message
       // Later this will be replaced with actual biometric authentication
-      const confirmAuth = window.confirm("Authenticate to fill password?");
+      setShowBiometricAuth(true);
+      // const confirmAuth = window.confirm("Authenticate to fill password?");
 
-      if (confirmAuth) {
+      if (bioAuthResponse) {
         // Proceed with filling password after successful authentication
         handleFillPassword(password);
       }
@@ -176,22 +178,21 @@ const Home: FC = () => {
     setGeneratedPassword(password);
   };
 
-  const handleBiometricSuccess = (data: { blob: Blob; type: string }) => {
+  const handleBiometricSuccess = async (data: { blob: Blob; type: string }) => {
+    setBioAuthResponse(false);
     console.log("Biometric data captured:", data);
     // Add the biometric data to the state
     const formData = new FormData();
     formData.append("biometricData", data.blob);
     formData.append("type", data.type);
 
-    const response = matchBiometricData(formData);
+    const response = await matchBiometricData(formData);
     console.log("Biometric match response:", response);
+    //assume response will be true or false... 
+    setBioAuthResponse(response);
 
-    // replace according to the reponse received... 
-    if (pendingPassword) {
-      handleFillPassword(pendingPassword);
-    }
     setShowBiometricAuth(false);
-    setPendingPassword(null);
+    
   };
 
   const handleBiometricFailure = (error: string) => {
@@ -199,7 +200,7 @@ const Home: FC = () => {
     showError("Biometric authentication failed");
     
     setShowBiometricAuth(false);
-    setPendingPassword(null);
+    setBioAuthResponse(false);
   }
 
   if (!isAuthenticated) {

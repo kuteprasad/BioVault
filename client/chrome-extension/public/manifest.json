@@ -12,14 +12,9 @@
     "microphone"
   ],
   "host_permissions": [
-    "http://localhost:5173/*",
-    "http://*/*",
-    "https://*/*"
+     "*://*/*"
   ],
-  "optional_permissions": [
-    "camera",
-    "microphone"
-  ],
+  
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
