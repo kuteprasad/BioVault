@@ -1,10 +1,10 @@
 import User from '../models/User.js';
-import BiometricData from '../models/BiometricData.js';
+
 import jwt from 'jsonwebtoken';
 import { sendEmail } from '../utils/sendEmail.js';
 import dotenv from 'dotenv';
 import bcrypt from 'bcrypt';
-import cloudinary from '../config/cloudinary.js';
+
 
 dotenv.config();
 

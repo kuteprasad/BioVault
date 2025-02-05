@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router';
 import { CheckCircle, XCircle, ChevronDownIcon, ChevronUpIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import BiometricCapture from '../../components/biometrics/BiometricCapture';
-import api from '../../utils/api';
+import axios from 'axios';
+import { matchBiometricData } from '~/services/authService';
 
 type BiometricType = 'fingerprint' | 'photo' | 'voice';
 interface MatchResult {
@@ -29,11 +30,7 @@ const MatchBiometrics = () => {
       formData.append('type', data.type);
 
       // API call to match biometric
-      const response = await api.post(`/auth/biometrics/${data.type}/match`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      const response = await matchBiometricData(formData);
 
       const matchResult: MatchResult = {
         percentage: response.data.matchPercentage,
