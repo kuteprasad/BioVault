@@ -153,6 +153,17 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
         });
       // }
     }
+    if (message.type === 'CHECK_MEDIA_PERMISSIONS') {
+      navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+        .then(stream => {
+          stream.getTracks().forEach(track => track.stop());
+          sendResponse({ success: true });
+        })
+        .catch(error => {
+          sendResponse({ success: false, error: error.message });
+        });
+      return true; // Important: indicates we will send a response asynchronously
+    }
   } catch (error) {
     console.error("DEBUG: Error in message listener:", error);
     sendResponse({
