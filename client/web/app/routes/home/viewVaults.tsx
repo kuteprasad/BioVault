@@ -39,7 +39,7 @@ const samplePasswords: PasswordEntry[] = [
 
 export default function ViewVaults() {
   const [passwords, setPasswords] = useState<PasswordEntry[]>([]);
-  const [visiblePasswords, setVisiblePasswords] = useState<Set<string>>(new Set());
+  const [visiblePasswordId, setVisiblePasswordId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -62,15 +62,8 @@ export default function ViewVaults() {
   };
 
   const togglePasswordVisibility = (passwordId: string) => {
-    setVisiblePasswords(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(passwordId)) {
-        newSet.delete(passwordId);
-      } else {
-        newSet.add(passwordId);
-      }
-      return newSet;
-    });
+    console.log('Toggling visibility for password:', passwordId);
+    setVisiblePasswordId(prev => prev === passwordId ? null : passwordId);
   };
 
   const copyToClipboard = (text: string, type: string) => {
@@ -182,22 +175,22 @@ export default function ViewVaults() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-2">
                         <span className="text-sm text-gray-900">
-                          {visiblePasswords.has(password.id) 
+                          {visiblePasswordId === password._id 
                             ? password.passwordEncrypted 
                             : '••••••••'}
                         </span>
                         <div className="flex items-center gap-2">
                           <button
-                            onClick={() => togglePasswordVisibility(password.id)}
+                            onClick={() => password._id && togglePasswordVisibility(password._id)}
                             className="text-gray-400 hover:text-purple-600"
-                            title={visiblePasswords.has(password.id) ? 'Hide Password' : 'Show Password'}
+                            title={visiblePasswordId === password._id ? 'Hide Password' : 'Show Password'}
                           >
-                            {visiblePasswords.has(password.id) 
+                            {visiblePasswordId === password._id 
                               ? <EyeOff className="h-4 w-4" />
                               : <Eye className="h-4 w-4" />}
                           </button>
                           <button 
-                            onClick={() => copyToClipboard(password.password, 'Password')}
+                            onClick={() => copyToClipboard(password.passwordEncrypted, 'Password')}
                             className="text-gray-400 hover:text-purple-600"
                             title="Copy Password"
                           >
