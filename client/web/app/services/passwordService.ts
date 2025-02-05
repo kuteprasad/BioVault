@@ -102,7 +102,7 @@ class PasswordService {
     }
   }
 
-  async updatePassword(passwordId: string, password: Partial<PasswordEntry>): Promise<PasswordEntry> {
+  async updatePassword(passwordId: string, updates: Partial<PasswordEntry>): Promise<PasswordEntry> {
     try {
       const token = getToken();
       console.log('Updating password:', {
@@ -114,7 +114,7 @@ class PasswordService {
         throw new Error('No authentication token found');
       }
 
-      const response = await api.put(`${this.baseUrl}/update-password/${passwordId}`, updates, {
+      const response = await api.put(`${this.baseUrl}/update/${passwordId}`, updates, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -131,7 +131,8 @@ class PasswordService {
     } catch (error: any) {
       console.error('Update password error:', {
         message: error.message,
-        response: error.response?.data
+        response: error.response?.data,
+        passwordId
       });
       toast.error(error.response?.data?.message || 'Failed to update password');
       throw error;
@@ -147,7 +148,7 @@ class PasswordService {
         throw new Error('No authentication token found');
       }
 
-      const response = await api.delete(`${this.baseUrl}/delete-password/${passwordId}`, {
+      const response = await api.delete(`${this.baseUrl}/delete/${passwordId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'

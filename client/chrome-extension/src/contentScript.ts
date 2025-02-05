@@ -1,4 +1,4 @@
-import { samplePasswords, PasswordEntry } from "./data/samplePasswords";
+// import { samplePasswords } from "./data/samplePasswords";
 
 // Properly typed form field handler with debouncing
 let focusTimeout: NodeJS.Timeout;
@@ -67,19 +67,19 @@ function fillFormFields(credentials: { username: string; password: string }) {
   return { usernameField, passwordField };
 }
 
-function checkUrlInPasswords(
-  currentUrl: string,
-  passwords: PasswordEntry[]
-): boolean {
-  // Normalize the current URL
-  const normalizedCurrentUrl = new URL(currentUrl).origin;
+// function checkUrlInPasswords(
+//   currentUrl: string,
+//   passwords: PasswordEntry[]
+// ): boolean {
+//   // Normalize the current URL
+//   const normalizedCurrentUrl = new URL(currentUrl).origin;
 
-  // Check if any password entry matches the current URL
-  return passwords.some((entry) => {
-    const entryUrl = new URL(entry.site).origin;
-    return normalizedCurrentUrl === entryUrl;
-  });
-}
+//   // Check if any password entry matches the current URL
+//   return passwords.some((entry) => {
+//     const entryUrl = new URL(entry.site).origin;
+//     return normalizedCurrentUrl === entryUrl;
+//   });
+// }
 
 function sendMessageToBackground(message: {
   type: string;
@@ -126,10 +126,6 @@ function handleFocus(event: FocusEvent) {
         inputName: target.name || target.id,
       };
 
-      // Check if URL exists in passwords
-
-      // Fire and forget - don't wait for response
-
       sendMessageToBackground({
         type: "FORM_FIELD_FOCUSED",
         data: {
@@ -156,26 +152,9 @@ function initializeListeners() {
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   try {
     if (message.type === "FILL_FORM") {
-      const currentUrl = window.location.href;
 
-      const urlExists = checkUrlInPasswords(currentUrl, samplePasswords);
-
-      if (!urlExists) {
-        sendResponse({
-          success: false,
-          message: "No credentials found for this site",
-        });
-        return true;
-      }
-
-      const matchingEntry = samplePasswords.find((entry) => {
-        const entryUrl = new URL(entry.site).origin;
-        const currentOrigin = new URL(currentUrl).origin;
-        return entryUrl === currentOrigin;
-      });
-
-      if (matchingEntry) {
-        console.log("DEBUG: Found matching entry:", matchingEntry);
+      // if (matchingEntry) {
+      //   console.log("DEBUG: Found matching entry:", matchingEntry);
 
         const { usernameField, passwordField } = fillFormFields(message.data);
 
@@ -186,7 +165,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
             password: !!passwordField,
           },
         });
-      }
+      // }
     }
   } catch (error) {
     console.error("DEBUG: Error in message listener:", error);

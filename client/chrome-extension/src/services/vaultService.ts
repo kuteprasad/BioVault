@@ -1,19 +1,6 @@
 import { getExtensionToken } from '../context/AuthContext';
 
-interface VaultResponse {
-  vault: {
-    userId: string;
-    passwords: Array<{
-      site: string;
-      username: string;
-      passwordEncrypted: string;
-      notes?: string;
-      createdAt: string;
-      updatedAt: string;
-    }>;
-    encryption_key: string;
-  };
-}
+import { VaultResponse } from '../types/passwords';
 
 export const getVault = async (): Promise<VaultResponse> => {
   try {
@@ -25,7 +12,7 @@ export const getVault = async (): Promise<VaultResponse> => {
 
     console.log('Fetching vault with token:', token);
 
-    const response = await fetch('http://localhost:3000/vault/get-vault', {
+    const response = await fetch('http://localhost:3000/password/vault', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
