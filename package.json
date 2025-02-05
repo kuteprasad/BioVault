@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
-    "biovault": "file:"
+    "biovault": "file:",
+    "node": "^23.7.0"
   }
 }

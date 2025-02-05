@@ -78,17 +78,31 @@ const login = async (req, res) => {
       return res.status(401).json({ message: 'Invalid Password' });
     }
 
-    // Include user data in response
-    const userData = {
-      _id: user._id,
-      fullName: user.fullName,
-      email: user.email
-    };
+    // Generate token with shorter expiration time and refresh token
+    const token = jwt.sign(
+      { userId: user._id },
+      process.env.SECRET_KEY,
+      { expiresIn: '1h' } // Set to 1 hour
+    );
 
-    const token = jwt.sign({ userId: user._id }, process.env.SECRET_KEY, { expiresIn: '1h' });
-    res.status(200).json({ token, userData });
+    const refreshToken = jwt.sign(
+      { userId: user._id },
+      process.env.REFRESH_SECRET_KEY || process.env.SECRET_KEY,
+      { expiresIn: '7d' } // Set to 7 days
+    );
+
+    // Include user data and both tokens in response
+    res.json({
+      token,
+      refreshToken,
+      user: {
+        id: user._id,
+        email: user.email,
+        fullName: user.fullName
+      }
+    });
   } catch (error) {
-    console.log("error at login:", error);
+    console.error('Login error:', error);
     res.status(500).json({ message: 'Error logging in', error });
   }
 };
@@ -111,4 +125,31 @@ const getProfile = async (req, res) => {
   }
 };
 
-export { sendOTP, verifyOTP, signup, login,  getProfile };
+// Add refresh token endpoint
+const refreshAccessToken = async (req, res) => {
+  const { refreshToken } = req.body;
+
+  if (!refreshToken) {
+    return res.status(401).json({ message: 'Refresh token required' });
+  }
+
+  try {
+    const decoded = jwt.verify(
+      refreshToken,
+      process.env.REFRESH_SECRET_KEY || process.env.SECRET_KEY
+    );
+
+    const newToken = jwt.sign(
+      { userId: decoded.userId },
+      process.env.SECRET_KEY,
+      { expiresIn: '1h' }
+    );
+
+    res.json({ token: newToken });
+  } catch (error) {
+    console.error('Token refresh error:', error);
+    res.status(401).json({ message: 'Invalid refresh token' });
+  }
+};
+
+export { sendOTP, verifyOTP, signup, login, getProfile, refreshAccessToken };

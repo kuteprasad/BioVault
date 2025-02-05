@@ -13,8 +13,17 @@ export interface PasswordEntry {
   updatedAt?: string;
 }
 
+// Match the interface from importPasswords.tsx
+export interface ImportedPassword {
+  name: string;
+  url: string;
+  username: string;
+  password: string;
+  note: string;
+}
+
 class PasswordService {
-  private baseUrl = '/api/passwords'; // Match your backend route
+  private baseUrl = '/api/vault';  // Changed from /api/passwords to /api/vault
 
   async getVault(): Promise<PasswordEntry[]> {
     try {
@@ -78,6 +87,45 @@ class PasswordService {
       toast.success('Password deleted successfully');
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Error deleting password');
+      throw error;
+    }
+  }
+
+  // New method for importing passwords
+  async importPasswords(passwords: ImportedPassword[]): Promise<void> {
+    try {
+      const token = getToken();
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      console.log('Attempting import with:', {
+        endpoint: `${this.baseUrl}/import-passwords`,
+        passwordCount: passwords.length
+      });
+
+      const response = await api.post(
+        `${this.baseUrl}/import-passwords`,
+        { passwords },  // Only send passwords, userId will be extracted from token
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      console.log('Import response:', response.data);
+      toast.success(response.data.message || 'Passwords imported successfully');
+    } catch (error: any) {
+      console.error('Import error details:', {
+        message: error.message,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data
+      });
+      
+      toast.error(error.response?.data?.message || 'Failed to import passwords');
       throw error;
     }
   }

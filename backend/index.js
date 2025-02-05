@@ -22,16 +22,25 @@ app.use(cors({
 
 app.use(express.json());
 
+// Debug middleware to log all requests
+app.use((req, res, next) => {
+  console.log('Request received:', req.method, req.path);
+  next();
+});
+
+// Test endpoint to verify server is running
+app.get('/test', (req, res) => {
+  res.json({ message: 'Server is running' });
+});
+
 // Routes
 app.use('/auth', authRoutes);
-app.use('/api/passwords', vaultRoutes);
-
-// Test endpoint
-app.get('/test', (req, res) => {
-  res.send('Backend server is running!');
-});
+app.use('/vault', vaultRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  // console.log('Available routes:');
+  // console.log('- /api/auth/*');
+  // console.log('- /api/vault/*');
 });
