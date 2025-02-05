@@ -2,10 +2,13 @@ import { FC, useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import "./styles/styles.css";
 // import ".styles/animation.css";
-import { samplePasswords, PasswordEntry } from "../data/samplePasswords";
-import { LogOut, Key, Copy, RefreshCw } from "lucide-react";
+// import { samplePasswords, VaultResponse } from "../data/samplePasswords";
+import { PasswordEntry } from "../types/passwords";
+import { LogOut} from "lucide-react";
 
-import { getVault } from '../services/vaultService';
+import { getVault } from "../services/vaultService";
+
+import { GeneratePassword } from "./GeneratePassword";
 
 interface PasswordOptions {
   uppercase: boolean;
@@ -16,10 +19,9 @@ interface PasswordOptions {
 const Home: FC = () => {
   const { isAuthenticated, userId, logout } = useAuth();
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [_currentUrl, setCurrentUrl] = useState<string>("");
-  const [filteredPasswords, setFilteredPasswords] = useState<PasswordEntry[]>(
-    []
-  );
+  const [currentUrl, setCurrentUrl] = useState<string>("");
+  const [allPasswords, setAllPasswords] = useState<PasswordEntry[]>([]);
+  const [filteredPasswords, setFilteredPasswords] = useState<PasswordEntry[]>([]);
   const [showPasswordGenerator, setShowPasswordGenerator] = useState(false);
   const [passwordLength, setPasswordLength] = useState(16);
   const [generatedPassword, setGeneratedPassword] = useState("");
@@ -29,61 +31,48 @@ const Home: FC = () => {
     symbols: true,
   });
 
-  console.log(isAuthenticated,userId);
+  console.log(userId)
 
+  // Fetch vault data when authenticated
   useEffect(() => {
     const fetchVault = async () => {
       try {
-          useEffect(() => {
-    const fetchVault = async () => {
-      try {
-        console.log('Fetched vault data');
         const vaultData = await getVault();
-        console.log('Fetched vault data:', vaultData);
-        
+        console.log("Fetched vault data:", vaultData);
+
+        if (vaultData?.vault?.passwords) {
+          setAllPasswords(vaultData.vault.passwords);
+        }
       } catch (error) {
-        console.error('Error fetching vault:', error);
+        console.error("Error fetching vault:", error);
       }
     };
 
-   
     if (isAuthenticated) {
-      console.log("this is runiing")
-      fetchVault();
-    }
-  }, [isAuthenticated]);
-        const vaultData = await getVault();
-        console.log('Fetched vault data:', vaultData);
-        
-      } catch (error) {
-        console.error('Error fetching vault:', error);
-      }
-    };
-
-   
-    if (isAuthenticated) {
-      console.log("this is runiing")
       fetchVault();
     }
   }, [isAuthenticated]);
 
-  // Get current tab URL when component mounts
+  // Filter passwords for current URL
   useEffect(() => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (tabs[0]?.url) {
         const url = new URL(tabs[0].url).origin;
         setCurrentUrl(url);
 
-        // Filter passwords for current URL
-        const matchingPasswords = samplePasswords.filter((password) => {
-          const passwordUrl = new URL(password.site).origin;
-          return passwordUrl === url;
+        const matchingPasswords = allPasswords.filter((password) => {
+          try {
+            const passwordUrl = new URL(password.site).origin;
+            return passwordUrl === url;
+          } catch {
+            return false;
+          }
         });
 
         setFilteredPasswords(matchingPasswords);
       }
     });
-  }, []);
+  }, [allPasswords, currentUrl]);
 
   const handleAuthClick = () => {
     if (!isAuthenticated) {
@@ -98,28 +87,27 @@ const Home: FC = () => {
   const handelImportPassClick = () => {
     chrome.tabs.create({ url: "http://localhost:5173/import-passwords" });
   };
-
-  const copyToClipboard = (text: string, id: string) => {
-    navigator.clipboard.writeText(text);
-    setCopiedId(id);
-    setTimeout(() => setCopiedId(null), 2000);
-  };
-
+  
   const openSite = (url: string) => {
     chrome.tabs.create({ url });
+  };
+
+  const copyToClipboard = (password: PasswordEntry) => {
+    navigator.clipboard.writeText(password.passwordEncrypted);
+    setCopiedId(password._id);
+    setTimeout(() => setCopiedId(null), 2000);
   };
 
   const handleFillPassword = (password: PasswordEntry) => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (tabs[0]?.id) {
-        console.log("DEBUG: Sending FILL_FORM message to tab:", tabs[0].id);
         chrome.tabs.sendMessage(
           tabs[0].id,
           {
             type: "FILL_FORM",
             data: {
               username: password.username,
-              password: password.password,
+              password: password.passwordEncrypted,
             },
           },
           (response) => {
@@ -258,7 +246,7 @@ const Home: FC = () => {
                   {filteredPasswords.length > 0 ? (
                     filteredPasswords.map((password) => (
                       <div
-                        key={password.id}
+                        key={password._id} // Changed from password.id
                         className="flex max-h-[70px] items-center gap-3 bg-white/90 border border-slate-200 p-4 rounded-xl hover:border-purple-200 transition-all duration-300 group hover:shadow-sm"
                       >
                         <img
@@ -279,20 +267,18 @@ const Home: FC = () => {
                         </div>
                         <div className="flex items-center gap-2">
                           <button
-                            onClick={() =>
-                              copyToClipboard(password.password, password.id)
-                            }
+                            onClick={() => copyToClipboard(password)}
                             className="p-2 rounded-lg hover:bg-purple-50 transition-all duration-300 relative group"
                             title="Copy password"
                           >
                             <img
                               src={`/icons/${
-                                copiedId === password.id ? "check" : "copy"
+                                copiedId === password._id ? "check" : "copy"
                               }.svg`}
                               alt="Copy"
                               className="w-4 h-4 opacity-70 group-hover:opacity-100"
                             />
-                            {copiedId === password.id && (
+                            {copiedId === password._id && (
                               <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs py-1 px-2 rounded-lg shadow-lg whitespace-nowrap">
                                 Copied!
                               </span>
@@ -336,105 +322,16 @@ const Home: FC = () => {
         </div>
 
         {/* Generate Password Button */}
-        <div className="mt-3">
-          <button
-            onClick={() => {
-              setShowPasswordGenerator(!showPasswordGenerator);
-              if (!showPasswordGenerator) generatePassword();
-            }}
-            className={`w-full flex items-center justify-center gap-3 p-3 rounded-xl transition-all duration-300 shadow-sm active:scale-[0.99]
-      ${
-        showPasswordGenerator
-          ? "bg-purple-50 border-2 border-purple-200 text-purple-700"
-          : "bg-white border border-slate-200 hover:bg-purple-50/50 hover:border-purple-200"
-      }`}
-          >
-            <Key
-              className={`w-5 h-5 ${
-                showPasswordGenerator ? "text-purple-600" : "opacity-70"
-              }`}
-            />
-            <span
-              className={`font-medium ${
-                showPasswordGenerator ? "text-purple-700" : "text-slate-700"
-              }`}
-            >
-              Generate Strong Password
-            </span>
-          </button>
-        </div>
-
-        {/* Password Generator Panel */}
-        {showPasswordGenerator && (
-          <div
-            className="mt-3 overflow-hidden"
-            style={{
-              animation: "slideUp 0.3s ease-out forwards",
-            }}
-          >
-            <div className="mt-3 p-4 bg-white/80 border border-slate-200 rounded-xl">
-              <div className="flex items-center justify-between mb-4">
-                <div className="font-medium text-slate-700">
-                  Password Length
-                </div>
-                <input
-                  type="number"
-                  min="8"
-                  max="32"
-                  value={passwordLength}
-                  onChange={(e) => setPasswordLength(Number(e.target.value))}
-                  className="w-16 p-1 text-center border border-slate-200 rounded-lg"
-                />
-              </div>
-
-              <div className="space-y-2 mb-4">
-                {(
-                  Object.entries(passwordOptions) as [
-                    keyof PasswordOptions,
-                    boolean
-                  ][]
-                ).map(([key, value]) => (
-                  <label key={key} className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={value}
-                      onChange={() => handlePasswordOptionChange(key)}
-                      className="rounded text-purple-600"
-                    />
-                    <span className="text-sm text-slate-600">
-                      Include {key.charAt(0).toUpperCase() + key.slice(1)}
-                    </span>
-                  </label>
-                ))}
-              </div>
-
-              <div className="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg">
-                <input
-                  type="text"
-                  value={generatedPassword}
-                  readOnly
-                  className="w-full bg-transparent border-none text-sm"
-                />
-                <button
-                  onClick={() =>
-                    navigator.clipboard.writeText(generatedPassword)
-                  }
-                  className="p-1.5 rounded-lg hover:bg-purple-50 transition-all"
-                  title="Copy password"
-                >
-                  <Copy className="w-4 h-4 opacity-70 hover:opacity-100" />
-                </button>
-                <button
-                  onClick={generatePassword}
-                  className="p-1.5 rounded-lg hover:bg-purple-50 transition-all"
-                  title="Generate new password"
-                >
-                  <RefreshCw className="w-4 h-4 opacity-70 hover:opacity-100" />
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        <GeneratePassword 
+        showPasswordGenerator={showPasswordGenerator}
+        setShowPasswordGenerator={setShowPasswordGenerator}
+        passwordLength={passwordLength}
+        setPasswordLength={setPasswordLength}
+        generatedPassword={generatedPassword}
+        passwordOptions={passwordOptions}
+        handlePasswordOptionChange={handlePasswordOptionChange}
+        generatePassword={generatePassword}
+      />
 
         {/* Quick Actions */}
         <div className="mt-3">

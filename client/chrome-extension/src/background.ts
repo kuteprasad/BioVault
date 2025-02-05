@@ -1,5 +1,4 @@
 import type { ExtensionMessage } from "./types/messages";
-import { samplePasswords } from "./data/samplePasswords";
 
 // Add function to check if popup is open
 async function checkIfPopupIsOpen(): Promise<boolean> {
@@ -31,15 +30,9 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
       }
 
       const url = new URL(currentUrl).origin;
-      const hasMatchingPasswords = samplePasswords.some((entry) => {
-        const entryUrl = new URL(entry.site).origin;
-        return url === entryUrl;
-      });
-
-      console.log("DEBUG: URL check result:", { url, hasMatchingPasswords });
 
 
-      if (hasMatchingPasswords) {
+      
         try {
           // Update the extension icon
           await chrome.action.setBadgeText({
@@ -80,14 +73,7 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
             error: error instanceof Error ? error.message : "Unknown error" 
           });
         }
-      } else {
-        // Clear badge if no passwords match
-        chrome.action.setBadgeText({
-          text: "",
-          tabId: tabId
-        });
-        sendResponse({ success: true, hasPasswords: false });
-      }
+      
     }
   } catch (error) {
     console.error("DEBUG: Global error in message listener:", error);
