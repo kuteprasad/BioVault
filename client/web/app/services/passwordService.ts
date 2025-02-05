@@ -80,28 +80,6 @@ class PasswordService {
     }
   }
 
-  async getPasswordById(entryId: string): Promise<PasswordEntry | null> {
-    try {
-      const token = getToken();
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-
-      const response = await api.get(`${this.baseUrl}/${entryId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      return response.data.password || null;
-    } catch (error: any) {
-      console.error('Error fetching password by ID:', error);
-      toast.error(error.response?.data?.message || 'Failed to fetch password');
-      throw error;
-    }
-  }
-
   async updatePassword(passwordId: string, updates: Partial<PasswordEntry>): Promise<PasswordEntry> {
     try {
       const token = getToken();
@@ -219,7 +197,7 @@ class PasswordService {
 
       console.log('Fetching password by ID:', passwordId);
       
-      const response = await api.get(`${this.baseUrl}/get-password/${passwordId}`, {
+      const response = await api.get(`${this.baseUrl}/${passwordId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -230,18 +208,19 @@ class PasswordService {
         status: response.status,
         data: response.data
       });
+      return response.data.password || null;
+      // console.log(response)
+      // // Return the password entry from the vault
+      // const password = response.data.password.find(
+      //   (p: PasswordEntry) => p._id === passwordId
+      // );
 
-      // Return the password entry from the vault
-      const password = response.data.vault.passwords.find(
-        (p: PasswordEntry) => p._id === passwordId
-      );
+      // if (!password) {
+      //   console.log('Password not found in vault');
+      //   return null;
+      // }
 
-      if (!password) {
-        console.log('Password not found in vault');
-        return null;
-      }
-
-      return password;
+      // return password;
     } catch (error: any) {
       console.error('Get password by ID error:', {
         message: error.message,

@@ -213,14 +213,14 @@ export default function ViewVaults() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-2">
                         <button 
-                          onClick={() => navigate(`/edit-password/${password.id}`)}
+                          onClick={() => navigate(`/edit-password/${password._id}`)}
                           className="text-gray-400 hover:text-purple-600"
                           title="Edit Entry"
                         >
                           <Edit className="h-4 w-4" />
                         </button>
                         <button 
-                          onClick={() => password.id && handleDelete(password.id)}
+                          onClick={() => password._id && handleDelete(password._id)}
                           className="text-gray-400 hover:text-red-600"
                           title="Delete Entry"
                         >
