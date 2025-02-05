@@ -2,7 +2,6 @@ import express from 'express';
 import { sendOTP, verifyOTP, signup, login, getProfile } from '../controller/authController.js';
 import authMiddleware from '../middleware/authMiddleware.js';
 import upload from '../config/multer.js';
-import { addPassword, updatePassword, getVault, deletePassword } from '../controller/vaultController.js';
 import { matchBiometricData, saveBiometricData } from '../controller/biometricController.js';
 
 const router = express.Router();
@@ -14,6 +13,14 @@ router.post('/login', login);
 
 router.post('/biometrics/:type', authMiddleware, upload.single('biometricData'), saveBiometricData);
 
+router.post('/biometrics/:type/match',
+    authMiddleware,
+    upload.single('biometricData'),
+    matchBiometricData
+);
+
+router.get('/profile', authMiddleware, getProfile);
+// router.put('/profile', authMiddleware, updateProfile);
 
 
 export default router;
