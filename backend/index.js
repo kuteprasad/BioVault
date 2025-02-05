@@ -35,7 +35,7 @@ app.get('/test', (req, res) => {
 
 // Routes
 app.use('/auth', authRoutes);
-app.use('/vault', vaultRoutes);
+app.use('/password', vaultRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

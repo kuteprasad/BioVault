@@ -23,7 +23,7 @@ export interface ImportedPassword {
 }
 
 class PasswordService {
-  private baseUrl = '/vault';  
+  private baseUrl = '/password';  
 
   async getVault(): Promise<PasswordEntry[]> {
     try {
@@ -32,15 +32,23 @@ class PasswordService {
         throw new Error('No authentication token found');
       }
 
+      console.log('Attempting to fetch vault');
       const response = await api.get(`${this.baseUrl}/vault`, {
         headers: {
-          Authorization: `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
         }
       });
-      return response.data.passwords || [];
+
+      console.log('Vault fetch response:', response.data);
+      
+      // Extract passwords from vault object
+      const passwords = response.data.vault?.passwords || [];
+      return passwords;
     } catch (error: any) {
-      console.error('Error fetching vault:', error);
-      throw new Error(error.response?.data?.message || 'Failed to fetch passwords');
+      console.error('Vault fetch error:', error);
+      toast.error(error.response?.data?.message || 'Failed to fetch vault');
+      throw error;
     }
   }
 
