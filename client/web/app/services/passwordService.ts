@@ -52,34 +52,78 @@ class PasswordService {
     }
   }
 
-  async addPassword(password: Omit<PasswordEntry, '_id'>): Promise<PasswordEntry> {
+  async addPassword(passwordData: Omit<PasswordEntry, '_id' | 'createdAt' | 'updatedAt'>): Promise<PasswordEntry> {
     try {
       const token = getToken();
-      const response = await api.post(`${this.baseUrl}/add`, password, {
+      console.log('Adding new password:', {
+        site: passwordData.site,
+        username: passwordData.username,
+        hasNotes: !!passwordData.notes
+      });
+
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      const response = await api.post(`${this.baseUrl}/add`, passwordData, {
         headers: {
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
       });
+
+      console.log('Add password response:', {
+        status: response.status,
+        newPassword: response.data.vault?.passwords?.slice(-1)[0]
+      });
+
       toast.success('Password added successfully');
-      return response.data.password;
+      return response.data.vault.passwords.slice(-1)[0];
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Error adding password');
+      console.error('Add password error:', {
+        message: error.message,
+        response: error.response?.data
+      });
+      toast.error(error.response?.data?.message || 'Failed to add password');
       throw error;
     }
   }
 
-  async updatePassword(passwordId: string, password: Partial<PasswordEntry>): Promise<PasswordEntry> {
+  async updatePassword(
+    passwordId: string, 
+    updates: Partial<Omit<PasswordEntry, '_id' | 'createdAt' | 'updatedAt'>>
+  ): Promise<PasswordEntry> {
     try {
       const token = getToken();
-      const response = await api.put(`${this.baseUrl}/${passwordId}`, password, {
+      console.log('Updating password:', {
+        passwordId,
+        updateFields: Object.keys(updates)
+      });
+
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      const response = await api.put(`${this.baseUrl}/update-password/${passwordId}`, updates, {
         headers: {
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
       });
+
+      console.log('Update password response:', {
+        status: response.status,
+        updatedPassword: response.data.vault?.passwords?.find((p: PasswordEntry) => p._id === passwordId)
+      });
+
       toast.success('Password updated successfully');
-      return response.data.password;
+      return response.data.vault.passwords.find((p: PasswordEntry) => p._id === passwordId);
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Error updating password');
+      console.error('Update password error:', {
+        message: error.message,
+        response: error.response?.data
+      });
+      toast.error(error.response?.data?.message || 'Failed to update password');
       throw error;
     }
   }
@@ -87,14 +131,31 @@ class PasswordService {
   async deletePassword(passwordId: string): Promise<void> {
     try {
       const token = getToken();
-      await api.delete(`${this.baseUrl}/${passwordId}`, {
+      console.log('Deleting password:', { passwordId });
+
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      const response = await api.delete(`${this.baseUrl}/delete-password/${passwordId}`, {
         headers: {
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
       });
+
+      console.log('Delete password response:', {
+        status: response.status,
+        message: response.data.message
+      });
+
       toast.success('Password deleted successfully');
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Error deleting password');
+      console.error('Delete password error:', {
+        message: error.message,
+        response: error.response?.data
+      });
+      toast.error(error.response?.data?.message || 'Failed to delete password');
       throw error;
     }
   }

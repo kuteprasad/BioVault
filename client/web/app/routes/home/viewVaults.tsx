@@ -8,31 +8,32 @@ import type { PasswordEntry } from '../../services/passwordService';
 // Sample data for development
 const samplePasswords: PasswordEntry[] = [
   {
-    id: '1',
+    _id: '1',
     site: 'https://github.com',
     username: 'devuser123',
-    password: 'SecurePass123!',
+    passwordEncrypted: 'SecurePass123!',
     notes: 'GitHub personal account',
-    created_at: new Date('2024-03-15').toISOString(),
-    updated_at: new Date('2024-03-15').toISOString()
+    createdAt: new Date('2024-03-15').toISOString(),
+    updatedAt: new Date('2024-03-15').toISOString()
+    // updatedAt: new Date('2024-03-15').toISOString()
   },
   {
-    id: '2',
+    _id: '2',
     site: 'https://netflix.com',
     username: 'netflixuser',
-    password: 'NetflixPass456!',
+    passwordEncrypted: 'NetflixPass456!',
     notes: 'Family Netflix account',
-    created_at: new Date('2024-03-14').toISOString(),
-    updated_at: new Date('2024-03-14').toISOString()
+    createdAt: new Date('2024-03-14').toISOString(),
+    updatedAt: new Date('2024-03-14').toISOString()
   },
   {
-    id: '3',
+    _id: '3',
     site: 'https://amazon.com',
     username: 'shopper789',
-    password: 'AmazonShop789!',
+    passwordEncrypted: 'AmazonShop789!',
     notes: 'Prime shopping account',
-    created_at: new Date('2024-03-13').toISOString(),
-    updated_at: new Date('2024-03-13').toISOString()
+    createdAt: new Date('2024-03-13').toISOString(),
+    updatedAt: new Date('2024-03-13').toISOString()
   }
 ];
 
@@ -182,7 +183,7 @@ export default function ViewVaults() {
                       <div className="flex items-center gap-2">
                         <span className="text-sm text-gray-900">
                           {visiblePasswords.has(password.id) 
-                            ? password.password 
+                            ? password.passwordEncrypted 
                             : '••••••••'}
                         </span>
                         <div className="flex items-center gap-2">
@@ -211,8 +212,8 @@ export default function ViewVaults() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                       <div className="flex items-center gap-1">
                         <Calendar className="h-4 w-4 text-purple-500" />
-                        {password.updated_at 
-                          ? new Date(password.updated_at).toLocaleDateString()
+                        {password.updatedAt 
+                          ? new Date(password.updatedAt).toLocaleDateString()
                           : 'N/A'}
                       </div>
                     </td>
