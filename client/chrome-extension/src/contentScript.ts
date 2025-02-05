@@ -1,6 +1,5 @@
 import { samplePasswords, PasswordEntry } from "./data/samplePasswords";
 
-
 // Properly typed form field handler with debouncing
 let focusTimeout: NodeJS.Timeout;
 
@@ -16,20 +15,19 @@ function fillFormFields(credentials: { username: string; password: string }) {
   // Find username/email field with more flexible matching
   const usernameField = inputs.find((input) => {
     const inputType = input.type.toLowerCase();
-    const inputName = (input.name || input.id || '').toLowerCase();
-    const inputPlaceholder = (input.placeholder || '').toLowerCase();
-    
+    const inputName = (input.name || input.id || "").toLowerCase();
+    const inputPlaceholder = (input.placeholder || "").toLowerCase();
+
     // Check for common username/email field identifiers
     const isUsernameOrEmail = [
-      'username',
-      'email',
-      'user',
-      'login',
-      'userid',
-      'account'
-    ].some(term => 
-      inputName.includes(term) || 
-      inputPlaceholder.includes(term)
+      "username",
+      "email",
+      "user",
+      "login",
+      "userid",
+      "account",
+    ].some(
+      (term) => inputName.includes(term) || inputPlaceholder.includes(term)
     );
 
     return (
@@ -69,7 +67,11 @@ function fillFormFields(credentials: { username: string; password: string }) {
   return { usernameField, passwordField };
 }
 
-function checkUrlInPasswords(currentUrl: string, passwords: PasswordEntry[]): boolean {  // Normalize the current URL
+function checkUrlInPasswords(
+  currentUrl: string,
+  passwords: PasswordEntry[]
+): boolean {
+  // Normalize the current URL
   const normalizedCurrentUrl = new URL(currentUrl).origin;
 
   // Check if any password entry matches the current URL
@@ -78,7 +80,6 @@ function checkUrlInPasswords(currentUrl: string, passwords: PasswordEntry[]): bo
     return normalizedCurrentUrl === entryUrl;
   });
 }
-
 
 function sendMessageToBackground(message: {
   type: string;
@@ -100,8 +101,6 @@ function sendMessageToBackground(message: {
     }
   });
 }
-
-
 
 function handleFocus(event: FocusEvent) {
   const target = event.target as HTMLInputElement;
@@ -128,9 +127,9 @@ function handleFocus(event: FocusEvent) {
       };
 
       // Check if URL exists in passwords
-   
 
       // Fire and forget - don't wait for response
+
       sendMessageToBackground({
         type: "FORM_FIELD_FOCUSED",
         data: {
@@ -140,7 +139,6 @@ function handleFocus(event: FocusEvent) {
     }
   }, 100);
 }
-
 
 // Initialize listeners with cleanup
 function initializeListeners() {
@@ -156,26 +154,21 @@ function initializeListeners() {
 }
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
- 
-
   try {
     if (message.type === "FILL_FORM") {
       const currentUrl = window.location.href;
-     
-      
+
       const urlExists = checkUrlInPasswords(currentUrl, samplePasswords);
-      
 
       if (!urlExists) {
-
-        sendResponse({ 
+        sendResponse({
           success: false,
-          message: "No credentials found for this site"
+          message: "No credentials found for this site",
         });
         return true;
       }
 
-      const matchingEntry = samplePasswords.find(entry => {
+      const matchingEntry = samplePasswords.find((entry) => {
         const entryUrl = new URL(entry.site).origin;
         const currentOrigin = new URL(currentUrl).origin;
         return entryUrl === currentOrigin;
@@ -183,23 +176,23 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 
       if (matchingEntry) {
         console.log("DEBUG: Found matching entry:", matchingEntry);
-        
+
         const { usernameField, passwordField } = fillFormFields(message.data);
 
-        sendResponse({ 
+        sendResponse({
           success: true,
           fieldsFound: {
             username: !!usernameField,
-            password: !!passwordField
-          }
+            password: !!passwordField,
+          },
         });
       }
     }
   } catch (error) {
     console.error("DEBUG: Error in message listener:", error);
-    sendResponse({ 
-      success: false, 
-      error: error instanceof Error ? error.message : 'Unknown error'
+    sendResponse({
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
     });
   }
 
