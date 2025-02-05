@@ -40,7 +40,7 @@ app.use('/api/vault', vaultRoutes);
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-  console.log('Available routes:');
-  console.log('- /api/auth/*');
-  console.log('- /api/vault/*');
+  // console.log('Available routes:');
+  // console.log('- /api/auth/*');
+  // console.log('- /api/vault/*');
 });

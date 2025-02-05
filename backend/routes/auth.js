@@ -21,6 +21,6 @@ router.post('/biometrics/:type/match',
 
 router.get('/profile', authMiddleware, getProfile);
 // router.put('/profile', authMiddleware, updateProfile);
-router.post('/refresh-token', refreshAccessToken);
+// router.post('/refresh-token', refreshAccessToken);
 
 export default router;
