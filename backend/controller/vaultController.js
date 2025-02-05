@@ -14,57 +14,49 @@ export const addPassword = async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    const vault = await Vault.findOne({ userId });
+    let vault = await Vault.findOne({ userId });
     if (!vault) {
-      return res.status(404).json({ message: 'Vault not found' });
+      const encryptionKey = crypto.randomBytes(32).toString('hex');
+      vault = new Vault({ 
+        userId, 
+        passwords: [], 
+        encryption_key: encryptionKey 
+      });
     }
 
-    // Log original password (for development only)
-    console.log('Original password:', passwordEncrypted);
+    // Check if a password with the same site and username already exists
+    const existingPassword = vault.passwords.find(p => p.site === site && p.username === username);
 
-    // Encrypt the password
-    const encryptedPassword = encryptionService.encrypt(passwordEncrypted);
-    
-    // Log encrypted password
-    console.log('Encrypted password:', encryptedPassword);
+    if (existingPassword) {
+      // Update the existing password
+      existingPassword.passwordEncrypted = encryptionService.encrypt(passwordEncrypted, vault.encryption_key);
+      existingPassword.notes = notes || existingPassword.notes;
+      existingPassword.updatedAt = new Date();
+      console.log('Password updated successfully');
+    } else {
+      // Add the new password
+      const newPassword = {
+        site,
+        username,
+        passwordEncrypted: encryptionService.encrypt(passwordEncrypted, vault.encryption_key),
+        notes,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      vault.passwords.push(newPassword);
+      console.log('Password added successfully');
+    }
 
-    const newPassword = {
-      site,
-      username,
-      passwordEncrypted: encryptedPassword,
-      notes,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
-
-    vault.passwords.push(newPassword);
     await vault.save();
 
-    // Verify encryption by fetching the saved password
-    const savedVault = await Vault.findOne({ userId });
-    const lastPassword = savedVault.passwords[savedVault.passwords.length - 1];
-    console.log('Saved encrypted password:', lastPassword.passwordEncrypted);
-
-    // Try decrypting to verify
-    const decryptedPassword = encryptionService.decrypt(lastPassword.passwordEncrypted);
-    console.log('Decrypted password:', decryptedPassword);
-    console.log('Encryption successful:', decryptedPassword === passwordEncrypted);
-
-    console.log('Password added successfully');
     res.status(201).json({ 
-      message: 'Password added successfully',
-      vault: {
-        ...vault.toObject(),
-        passwords: vault.passwords.map(p => ({
-          ...p.toObject(),
-          passwordEncrypted: '******' // Hide encrypted passwords in response
-        }))
-      }
+      message: 'Password added or updated successfully',
+      vault 
     });
   } catch (error) {
-    console.error('Error adding password:', error);
+    console.error('Error adding or updating password:', error);
     res.status(500).json({ 
-      message: 'Error adding password', 
+      message: 'Error adding or updating password', 
       error: error.message 
     });
   }
@@ -162,7 +154,7 @@ export const getVault = async (req, res) => {
           return {
             ...p.toObject(),
             passwordEncrypted: isEncrypted 
-              ? encryptionService.decrypt(p.passwordEncrypted)
+              ? encryptionService.decrypt(p.passwordEncrypted, vault.encryption_key)
               : p.passwordEncrypted // Return as-is if not encrypted
           };
         } catch (error) {
