@@ -1,4 +1,3 @@
-// import { samplePasswords } from "./data/samplePasswords";
 
 // Properly typed form field handler with debouncing
 let focusTimeout: NodeJS.Timeout;
@@ -67,19 +66,6 @@ function fillFormFields(credentials: { username: string; password: string }) {
   return { usernameField, passwordField };
 }
 
-// function checkUrlInPasswords(
-//   currentUrl: string,
-//   passwords: PasswordEntry[]
-// ): boolean {
-//   // Normalize the current URL
-//   const normalizedCurrentUrl = new URL(currentUrl).origin;
-
-//   // Check if any password entry matches the current URL
-//   return passwords.some((entry) => {
-//     const entryUrl = new URL(entry.site).origin;
-//     return normalizedCurrentUrl === entryUrl;
-//   });
-// }
 
 function sendMessageToBackground(message: {
   type: string;

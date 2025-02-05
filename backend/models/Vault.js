@@ -5,7 +5,10 @@ const { Schema } = mongoose;
 const passwordSchema = new Schema({
   site: { type: String, required: true },
   username: { type: String, required: true },
-  passwordEncrypted: { type: String, required: true },
+  passwordEncrypted: { 
+    type: String, 
+    required: true
+  },
   notes: { type: String },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
@@ -19,7 +22,7 @@ const vaultSchema = new Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
-vaultSchema.pre('save', function (next) {
+vaultSchema.pre('save', function(next) {
   this.updatedAt = Date.now();
   next();
 });

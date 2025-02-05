@@ -99,13 +99,22 @@ class PasswordService {
         }
       });
 
+      // Find the updated password in the response
+      const updatedPassword = response.data.vault.passwords.find(
+        (p: PasswordEntry) => p._id === passwordId
+      );
+
+      if (!updatedPassword) {
+        throw new Error('Updated password not found in response');
+      }
+
       console.log('Update password response:', {
         status: response.status,
-        updatedPassword: response.data.vault?.passwords?.find((p: PasswordEntry) => p._id === passwordId)
+        updatedPassword
       });
 
       toast.success('Password updated successfully');
-      return response.data.vault.passwords.find((p: PasswordEntry) => p._id === passwordId);
+      return updatedPassword;
     } catch (error: any) {
       console.error('Update password error:', {
         message: error.message,
@@ -119,8 +128,9 @@ class PasswordService {
 
   async deletePassword(passwordId: string): Promise<void> {
     try {
+      
       const token = getToken();
-      console.log('Deleting password:', { passwordId });
+      console.log('func Deleting password:', { passwordId });
 
       if (!token) {
         throw new Error('No authentication token found');
@@ -227,6 +237,28 @@ class PasswordService {
         response: error.response?.data
       });
       toast.error(error.response?.data?.message || 'Failed to fetch password');
+      throw error;
+    }
+  }
+
+  // Add a new method to get decrypted password for editing
+  async getPasswordForEdit(passwordId: string): Promise<PasswordEntry> {
+    try {
+      const token = getToken();
+      if (!token) throw new Error('No authentication token found');
+
+      const response = await api.get(`${this.baseUrl}/${passwordId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      // The password should already be decrypted in the response
+      return response.data.password;
+    } catch (error: any) {
+      console.error('Get password for edit error:', error);
+      toast.error(error.response?.data?.message || 'Failed to get password');
       throw error;
     }
   }

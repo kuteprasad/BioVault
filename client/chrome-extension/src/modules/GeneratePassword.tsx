@@ -38,12 +38,7 @@ export const GeneratePassword: FC<GeneratePasswordProps> = ({
             setShowPasswordGenerator(!showPasswordGenerator);
             if (!showPasswordGenerator) generatePassword();
           }}
-          className={`w-full flex items-center justify-center gap-3 p-3 rounded-xl transition-all duration-300 shadow-sm active:scale-[0.99]
-          ${
-            showPasswordGenerator
-              ? "bg-purple-50 border-2 border-purple-200 text-purple-700"
-              : "bg-white border border-slate-200 hover:bg-purple-50/50 hover:border-purple-200"
-          }`}
+          className="w-full flex items-center justify-center gap-3 p-3 rounded-xl transition-all duration-300 shadow-sm active scale-[0.99] bg-purple-50 border-2 border-purple-200 text-purple-700"
         >
           <Key
             className={`w-5 h-5 ${
@@ -68,7 +63,7 @@ export const GeneratePassword: FC<GeneratePasswordProps> = ({
             animation: "slideUp 0.3s ease-out forwards",
           }}
         >
-          <div className="mt-3 p-4 bg-white/80 border border-slate-200 rounded-xl">
+          <div className="mt-3 p-4 bg-white/80 border shadow-inner border-slate-200 rounded-xl">
             <div className="flex items-center justify-between mb-4">
               <div className="font-medium text-slate-700">Password Length</div>
               <input
