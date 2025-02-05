@@ -48,7 +48,7 @@ async def verify_faces(data: Photo):
         )
         logging.info(f"Verification complete: {verification}")
         
-        return verification
+        return {"verified": verification["verified"]}
         
     except Exception as e:
         logging.error(f"Verification failed: {str(e)}")
@@ -127,7 +127,7 @@ async def verify_voices(data: Voice):
             response = transcribe_audio(combined_path, API_KEY)
             if response:
                 is_same_speaker = verify_speaker(response)
-                return {"verified": is_same_speaker, "response": response}
+                return {"verified": is_same_speaker}
             else:
                 raise HTTPException(status_code=500, detail="Transcription failed")
 

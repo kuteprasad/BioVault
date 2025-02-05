@@ -4,11 +4,14 @@ import "./styles/styles.css";
 // import ".styles/animation.css";
 // import { samplePasswords, VaultResponse } from "../data/samplePasswords";
 import { PasswordEntry } from "../types/passwords";
-import { LogOut} from "lucide-react";
+import { LogOut } from "lucide-react";
 
 import { getVault } from "../services/vaultService";
 
 import { GeneratePassword } from "./GeneratePassword";
+// Add import
+import { BiometricAuth } from "./BiometricAuth";
+import { matchBiometricData } from "../services/authService";
 
 interface PasswordOptions {
   uppercase: boolean;
@@ -31,6 +34,16 @@ const Home: FC = () => {
     symbols: true,
   });
 
+
+  // Add new state after other states
+  const [showBiometricAuth, setShowBiometricAuth] = useState(false);
+  const [bioAuthResponse, setBioAuthResponse] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const showError = (message: string) => {
+    setError(message);
+    setTimeout(() => setError(null), 3000); // Auto dismiss after 3s
+  };
   console.log(userId)
 
   // Fetch vault data when authenticated
@@ -87,7 +100,7 @@ const Home: FC = () => {
   const handelImportPassClick = () => {
     chrome.tabs.create({ url: "http://localhost:5173/import-passwords" });
   };
-  
+
   const openSite = (url: string) => {
     chrome.tabs.create({ url });
   };
@@ -118,6 +131,28 @@ const Home: FC = () => {
     });
   };
 
+  const handleAuthBeforeFill = async (password: PasswordEntry) => {
+    try {
+
+      // This is where we'll add the authentication API call later
+      console.log("Initiating auth before fill for:", password.site);
+      
+      // For now, just show a temporary message
+      // Later this will be replaced with actual biometric authentication
+      setShowBiometricAuth(true);
+      // const confirmAuth = window.confirm("Authenticate to fill password?");
+
+      if (bioAuthResponse) {
+        // Proceed with filling password after successful authentication
+        handleFillPassword(password);
+      }
+
+    } catch (error) {
+      console.error("Authentication failed:", error);
+      // We can add proper error handling here later
+    }
+  };
+
   const handlePasswordOptionChange = (key: keyof PasswordOptions) => {
     setPasswordOptions((prev) => ({
       ...prev,
@@ -142,6 +177,31 @@ const Home: FC = () => {
     }
     setGeneratedPassword(password);
   };
+
+  const handleBiometricSuccess = async (data: { blob: Blob; type: string }) => {
+    setBioAuthResponse(false);
+    console.log("Biometric data captured:", data);
+    // Add the biometric data to the state
+    const formData = new FormData();
+    formData.append("biometricData", data.blob);
+    formData.append("type", data.type);
+
+    const response = await matchBiometricData(formData);
+    console.log("Biometric match response:", response);
+    //assume response will be true or false... 
+    setBioAuthResponse(response);
+
+    setShowBiometricAuth(false);
+    
+  };
+
+  const handleBiometricFailure = (error: string) => {
+    console.error("Biometric auth failed:", error);
+    showError("Biometric authentication failed");
+    
+    setShowBiometricAuth(false);
+    setBioAuthResponse(false);
+  }
 
   if (!isAuthenticated) {
     return (
@@ -173,6 +233,22 @@ const Home: FC = () => {
         </div>
       </div>
     );
+  }
+
+  // Add JSX before the main return - after the authentication check
+  {
+    error && (
+      <div className="absolute top-2 left-2 right-2 z-50 animate-slideDown">
+        <div className="bg-red-50 border-l-4 border-red-500 p-3 rounded-r shadow-lg">
+          <div className="flex items-center gap-2">
+            <svg className="w-5 h-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+            </svg>
+            <p className="text-sm text-red-700">{error}</p>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -242,64 +318,74 @@ const Home: FC = () => {
                 <div className="font-semibold text-slate-800 mb-3 px-1">
                   Saved Passwords
                 </div>
-                <div className="space-y-2 max-h-[150px] overflow-y-auto pr-2 scrollbar-thin scrollbar-track-slate-100 scrollbar-thumb-purple-200 hover:scrollbar-thumb-purple-300 rounded-lg p-2 shadow-inner">
+                {/* Update the passwords list container div */}
+                <div className="space-y-2 max-h-[120px] overflow-y-auto pr-2 scrollbar-thin scrollbar-track-slate-100 scrollbar-thumb-purple-200 
+                hover:scrollbar-thumb-purple-300 rounded-lg p-2 shadow-inner 
+                bg-purple-50/30 backdrop-blur-sm">
                   {filteredPasswords.length > 0 ? (
                     filteredPasswords.map((password) => (
                       <div
-                        key={password._id} // Changed from password.id
-                        className="flex max-h-[70px] items-center gap-3 bg-white/90 border border-slate-200 p-4 rounded-xl hover:border-purple-200 transition-all duration-300 group hover:shadow-sm"
+                        key={password._id}
+                        className="flex max-h-[52px] items-center gap-3 bg-white/95 
+          border border-slate-200 p-3 rounded-lg hover:border-purple-200 
+          transition-all duration-300 group hover:shadow-sm 
+          hover:bg-purple-50/50"
                       >
                         <img
                           src={`https://www.google.com/s2/favicons?domain=${password.site}&sz=64`}
                           alt={new URL(password.site).hostname}
-                          className="w-6 h-6 rounded-lg shadow-sm"
+                          className="w-5 h-5 rounded shadow-sm"
                         />
                         <div
                           className="flex-1 min-w-0 cursor-pointer"
                           onClick={() => openSite(password.site)}
                         >
-                          <div className="font-medium text-slate-800 truncate hover:text-purple-600 transition-colors">
+                          <div className="font-medium text-slate-800 truncate 
+            hover:text-purple-600 transition-colors text-sm">
                             {new URL(password.site).hostname}
                           </div>
                           <div className="text-xs text-slate-500 truncate">
                             {password.username}
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1">
                           <button
                             onClick={() => copyToClipboard(password)}
-                            className="p-2 rounded-lg hover:bg-purple-50 transition-all duration-300 relative group"
+                            className="p-1.5 rounded-lg hover:bg-purple-100 
+              transition-all duration-300 relative group"
                             title="Copy password"
                           >
                             <img
-                              src={`/icons/${
-                                copiedId === password._id ? "check" : "copy"
-                              }.svg`}
+                              src={`/icons/${copiedId === password._id ? "check" : "copy"}.svg`}
                               alt="Copy"
-                              className="w-4 h-4 opacity-70 group-hover:opacity-100"
+                              className="w-3.5 h-3.5 opacity-70 group-hover:opacity-100"
                             />
                             {copiedId === password._id && (
-                              <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs py-1 px-2 rounded-lg shadow-lg whitespace-nowrap">
+                              <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 
+                bg-gray-800 text-white text-xs py-1 px-2 rounded-lg shadow-lg 
+                whitespace-nowrap">
                                 Copied!
                               </span>
                             )}
                           </button>
                           <button
-                            onClick={() => handleFillPassword(password)}
-                            className="p-2 rounded-lg hover:bg-purple-50 transition-all duration-300"
-                            title="Fill form"
+                            onClick={() => handleAuthBeforeFill(password)}
+                            className="px-2 py-1 rounded-lg bg-purple-600 hover:bg-purple-700 
+    transition-all duration-300 flex items-center gap-1 group"
+                            title="Authenticate & Fill"
                           >
                             <img
-                              src="/icons/fill.svg"
-                              alt="Fill"
-                              className="w-4 h-4 opacity-70 group-hover:opacity-100"
+                              src="/icons/auth.svg"
+                              alt="Authenticate"
+                              className="w-3.5 h-3.5 text-white"
                             />
+                            {/* <span className="text-xs text-white font-medium">Fill</span> */}
                           </button>
                         </div>
                       </div>
                     ))
                   ) : (
-                    <div className="text-center py-6 text-gray-500">
+                    <div className="text-center py-4 text-gray-500 text-sm">
                       No saved passwords for this site
                     </div>
                   )}
@@ -307,44 +393,44 @@ const Home: FC = () => {
               </div>
             </div>
           </div>
+
+
+
         )}
 
         {/* Biometric Auth */}
-        <div className="mt-6 mb-4">
-          <button className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white py-3.5 rounded-xl hover:opacity-95 transition-all duration-300 shadow-lg active:scale-[0.99] group">
-            <img
-              src="/icons/fingerprint.svg"
-              alt="Fingerprint"
-              className="w-5 h-5 group-hover:scale-110 transition-transform"
-            />
-            <span className="font-medium">Authenticate with Biometrics</span>
-          </button>
-        </div>
+        <BiometricAuth
+          showBiometricAuth={showBiometricAuth}
+          setShowBiometricAuth={setShowBiometricAuth}
+          onSuccess={handleBiometricSuccess}
+          onError={handleBiometricFailure}
+        />
 
         {/* Generate Password Button */}
-        <GeneratePassword 
-        showPasswordGenerator={showPasswordGenerator}
-        setShowPasswordGenerator={setShowPasswordGenerator}
-        passwordLength={passwordLength}
-        setPasswordLength={setPasswordLength}
-        generatedPassword={generatedPassword}
-        passwordOptions={passwordOptions}
-        handlePasswordOptionChange={handlePasswordOptionChange}
-        generatePassword={generatePassword}
-      />
+        <GeneratePassword
+          showPasswordGenerator={showPasswordGenerator}
+          setShowPasswordGenerator={setShowPasswordGenerator}
+          passwordLength={passwordLength}
+          setPasswordLength={setPasswordLength}
+          generatedPassword={generatedPassword}
+          passwordOptions={passwordOptions}
+          handlePasswordOptionChange={handlePasswordOptionChange}
+          generatePassword={generatePassword}
+        />
 
         {/* Quick Actions */}
-        <div className="mt-3">
-          <button
-            onClick={handelImportPassClick}
-            className="w-full flex items-center justify-center gap-3 bg-white border border-slate-200 p-3 rounded-xl hover:bg-purple-50/50 hover:border-purple-200 transition-all duration-300 shadow-sm active:scale-[0.99]"
-          >
-            <img src={`/icons/import.svg`} className="w-5 h-5 opacity-70" />
-            <span className="font-medium text-slate-700">
-              Import from Google
-            </span>
-          </button>
-        </div>
+        {!showPasswordGenerator && (
+          <div className="mt-3">
+            <button
+              onClick={handelImportPassClick}
+              className="w-full flex items-center justify-center gap-3 bg-white border border-slate-200 p-3 rounded-xl hover:bg-purple-50/50 hover:border-purple-200 transition-all duration-300 shadow-sm active:scale-[0.99]"
+            >
+              <img src={`/icons/import.svg`} className="w-5 h-5 opacity-70" />
+              <span className="font-medium text-slate-700">
+                Import from Google
+              </span>
+            </button>
+          </div>)}
       </div>
     </div>
   );
