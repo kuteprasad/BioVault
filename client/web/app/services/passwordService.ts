@@ -119,8 +119,9 @@ class PasswordService {
 
   async deletePassword(passwordId: string): Promise<void> {
     try {
+      
       const token = getToken();
-      console.log('Deleting password:', { passwordId });
+      console.log('func Deleting password:', { passwordId });
 
       if (!token) {
         throw new Error('No authentication token found');

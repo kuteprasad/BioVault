@@ -5,38 +5,6 @@ import { toast } from 'sonner';
 import PasswordService from '../../services/passwordService';
 import type { PasswordEntry } from '../../services/passwordService';
 
-// Sample data for development
-const samplePasswords: PasswordEntry[] = [
-  {
-    _id: '1',
-    site: 'https://github.com',
-    username: 'devuser123',
-    passwordEncrypted: 'SecurePass123!',
-    notes: 'GitHub personal account',
-    createdAt: new Date('2024-03-15').toISOString(),
-    updatedAt: new Date('2024-03-15').toISOString()
-    // updatedAt: new Date('2024-03-15').toISOString()
-  },
-  {
-    _id: '2',
-    site: 'https://netflix.com',
-    username: 'netflixuser',
-    passwordEncrypted: 'NetflixPass456!',
-    notes: 'Family Netflix account',
-    createdAt: new Date('2024-03-14').toISOString(),
-    updatedAt: new Date('2024-03-14').toISOString()
-  },
-  {
-    _id: '3',
-    site: 'https://amazon.com',
-    username: 'shopper789',
-    passwordEncrypted: 'AmazonShop789!',
-    notes: 'Prime shopping account',
-    createdAt: new Date('2024-03-13').toISOString(),
-    updatedAt: new Date('2024-03-13').toISOString()
-  }
-];
-
 export default function ViewVaults() {
   const [passwords, setPasswords] = useState<PasswordEntry[]>([]);
   const [visiblePasswordId, setVisiblePasswordId] = useState<string | null>(null);
@@ -75,6 +43,7 @@ export default function ViewVaults() {
     const confirmed = window.confirm('Are you sure you want to delete this password entry?');
     if (confirmed) {
       try {
+        console.log('Deleting password:', id);
         await PasswordService.deletePassword(id);
         // Remove the deleted entry from local state
         setPasswords(prev => prev.filter(p => p._id !== id));
