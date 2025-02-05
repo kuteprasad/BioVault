@@ -89,7 +89,6 @@ export const matchBiometricData = async (formData: FormData) => {
   }
 };
 
-// ... existing code ...
 
 // Fetch user profile
 export const fetchUserProfile = async () => {

@@ -3,6 +3,7 @@ import { Upload, FileCheck, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import Papa from 'papaparse';
 import { useNavigate } from 'react-router';
+import passwordService from '../../services/passwordService';
 
 interface ImportedPassword {
   name: string;
@@ -78,18 +79,17 @@ export default function ImportPasswords() {
   const handleImport = async () => {
     setIsLoading(true);
     try {
-      // API call to save passwords
-      // await savePasswords(passwords);
-
-      console.log("saved passwords", passwords);
-      
+      await passwordService.importPasswords(passwords);
       toast.success('Passwords imported successfully');
-      // navigate('/');
+      navigate('/'); // Navigate back to password list
     } catch (error) {
+      console.error('Error importing passwords:', error);
       toast.error('Failed to import passwords');
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
+  
 
   const resetUpload = () => {
     setPasswords([]);

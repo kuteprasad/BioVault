@@ -12,6 +12,8 @@ const Home: FC = () => {
   const [_currentUrl, setCurrentUrl] = useState<string>('');
   const [filteredPasswords, setFilteredPasswords] = useState<PasswordEntry[]>([]);
 
+  console.log(isAuthenticated);
+
   // Get current tab URL when component mounts
   useEffect(() => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -33,7 +35,7 @@ const Home: FC = () => {
   const handleAuthClick = () => {
     if (!isAuthenticated) {
       // Open main website in new tab
-      chrome.tabs.create({ url: "http://localhost:5173/login" });
+      chrome.tabs.create({ url: "http://localhost:5173/home1" });
     }
   };
 

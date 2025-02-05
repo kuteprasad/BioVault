@@ -1,5 +1,5 @@
 import express from 'express';
-import { sendOTP, verifyOTP, signup, login, getProfile } from '../controller/authController.js';
+import { sendOTP, verifyOTP, signup, login, getProfile, refreshAccessToken } from '../controller/authController.js';
 import authMiddleware from '../middleware/authMiddleware.js';
 import upload from '../config/multer.js';
 import { matchBiometricData, saveBiometricData } from '../controller/biometricController.js';
