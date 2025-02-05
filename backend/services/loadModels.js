@@ -1,8 +1,7 @@
 import path from 'path';
 import { fileURLToPath } from 'url';
 import * as faceapi from 'face-api.js';
-
-import { Canvas,  Image } from 'canvas';
+import { Canvas, Image } from 'canvas';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -13,6 +12,7 @@ faceapi.env.monkeyPatch({ Canvas, Image });
 
 class FaceModelLoader {
     static instance = null;
+    static modelsLoaded = false;
     
     static async getInstance() {
         if (!this.instance) {
@@ -23,12 +23,17 @@ class FaceModelLoader {
     }
 
     async initialize() {
+        if (FaceModelLoader.modelsLoaded) {
+            return;
+        }
+
         try {
             await Promise.all([
                 faceapi.nets.ssdMobilenetv1.loadFromDisk(modelsPath),
                 faceapi.nets.faceLandmark68Net.loadFromDisk(modelsPath),
                 faceapi.nets.faceRecognitionNet.loadFromDisk(modelsPath)
             ]);
+            FaceModelLoader.modelsLoaded = true;
             console.log('Face-API models loaded successfully');
         } catch (error) {
             console.error('Error loading face-api models:', error);
