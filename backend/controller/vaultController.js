@@ -53,17 +53,20 @@ export const updatePassword = async (req, res) => {
   try {
     const user = await User.findById(userId);
     if (!user) {
+      console.log('User not found:', userId);
       return res.status(404).json({ message: 'User not found' });
     }
-    
+
 
     const vault = await Vault.findOne({ userId });
     if (!vault) {
+      console.log('Vault not found for user:', userId);
       return res.status(404).json({ message: 'Vault not found' });
     }
 
     const passwordEntry = vault.passwords.id(passwordId);
     if (!passwordEntry) {
+      console.log('Password entry not found for passwordId:', passwordId);
       return res.status(404).json({ message: 'Password entry not found' });
     }
 
@@ -75,6 +78,7 @@ export const updatePassword = async (req, res) => {
 
     await vault.save();
 
+    console.log('Password updated successfully:', passwordEntry);
     res.status(200).json({ message: 'Password updated successfully', vault });
   } catch (error) {
     console.error('Error updating password:', error);
@@ -114,7 +118,34 @@ export const getVault = async (req, res) => {
     res.status(500).json({ message: 'Error retrieving vault', error: error.message });
   }
 };
-  
+
+export const getPasswordById = async (req, res) => {
+  const userId = req.user.userId;
+  const { passwordId } = req.params;
+
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const vault = await Vault.findOne({ userId });
+    if (!vault) {
+      return res.status(404).json({ message: 'Vault not found' });
+    }
+
+    const passwordEntry = vault.passwords.id(passwordId);
+    if (!passwordEntry) {
+      return res.status(404).json({ message: 'Password entry not found' });
+    }
+
+    res.status(200).json({ password: passwordEntry });
+  } catch (error) {
+    console.error('Error fetching password by ID:', error);
+    res.status(500).json({ message: 'Error fetching password by ID', error });
+  }
+};
+
 export const deletePassword = async (req, res) => {
     const { userId } = req.body;
     const { passwordId } = req.params;

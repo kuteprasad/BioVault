@@ -1,5 +1,5 @@
 import express from 'express';
-import { addPassword, updatePassword, getVault, deletePassword, saveImportedPasswords } from '../controller/vaultController.js';
+import { addPassword, updatePassword, getVault, deletePassword, saveImportedPasswords, getPasswordById } from '../controller/vaultController.js';
 import authMiddleware from '../middleware/authMiddleware.js';
 
 const router = express.Router();
@@ -14,11 +14,12 @@ router.use((req, res, next) => {
 router.use(authMiddleware);
 
 // Vault routes
-router.post('/add', addPassword);
-router.put('/update-password/:passwordId', updatePassword);
-router.get('/vault', getVault);
-router.delete('/delete-password/:passwordId', deletePassword);
-router.post('/import-passwords', saveImportedPasswords);
+router.post('/add', addPassword); //done
+router.put('/update/:passwordId', updatePassword); //done
+router.get('/vault', getVault); //done
+router.get('/:passwordId', getPasswordById); // done
+router.delete('/delete/:passwordId', deletePassword);
+router.post('/import-passwords', saveImportedPasswords); //done
 
 
 export default router; 

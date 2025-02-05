@@ -22,6 +22,7 @@ export default function EditPasswordForm() {
 
   const fetchPasswordEntry = async (entryId: string) => {
     try {
+      // const entry = await PasswordService.getPasswordById(entryId);
       const entry = await PasswordService.getPasswordById(entryId);
       if (entry) {
         setFormData(entry);
