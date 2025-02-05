@@ -14,6 +14,8 @@ import {
   ChevronRight,
   ChevronLeft,
   Loader,
+  LogOut,
+  Crown,
 } from "lucide-react";
 
 const ProfileSection: React.FC<{ isOpen: boolean }> = ({ isOpen }) => {
@@ -72,6 +74,7 @@ const Sidebar: React.FC = () => {
     { path: "/settings", icon: <Settings className="h-6 w-6" />, label: "Settings" },
     { path: "/import-passwords", icon: <Lock className="h-6 w-6" />, label: "Passwords" },
     { path: "/match-biometrics", icon: <FilePlus className="h-6 w-6" />, label: "Match Biometrics" },
+    { path: "/subscription", icon: <Crown className="h-6 w-6" />, label: "Subscription" },
   ];
 
   const getLinkStyles = ({ isActive }: { isActive: boolean }) => {

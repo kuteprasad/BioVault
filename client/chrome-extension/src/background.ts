@@ -1,5 +1,8 @@
 import type { ExtensionMessage } from "./types/messages";
 
+let popupShownForUrls: Set<string> = new Set();
+
+
 // Add function to check if popup is open
 async function checkIfPopupIsOpen(): Promise<boolean> {
   return new Promise((resolve) => {
@@ -30,6 +33,11 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
       }
 
       const url = new URL(currentUrl).origin;
+      if (popupShownForUrls.has(url)) {
+        console.log("DEBUG: Popup already shown for this URL");
+        sendResponse({ success: true });
+        return true;
+      }
 
 
       
@@ -58,11 +66,15 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
         
           // Check if popup is already open
           const popupIsOpen = await checkIfPopupIsOpen();
-          
-          // Only open popup if it's not already open
+
           if (!popupIsOpen) {
             await chrome.action.openPopup();
+            // Mark this URL as shown
+            popupShownForUrls.add(url);
           }
+          
+          // Only open popup if it's not already open
+         
           
           sendResponse({ success: true });
         
@@ -129,6 +141,8 @@ chrome.tabs.onRemoved.addListener((tabId) => {
       text: "",
       tabId: tabId,
     });
+    // Clear popup shown status when tab closes
+    popupShownForUrls.clear();
   } catch (error) {
     console.error("DEBUG: Error clearing badge on tab removal:", error);
   }
