@@ -15,9 +15,10 @@ export const setToken = (token: string) => {
     localStorage.setItem('jwtToken', token);
     console.log("token stored:", token);
 
+    // Send token to extension
     if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
       chrome.runtime.sendMessage(
-        'fdkegggnmkoclihhhajpaacdcnkcmepd',
+        'fdkegggnmkoclihhhajpaacdcnkcmepd', // Your extension ID
         { type: 'LOGIN_SUCCESS', token: token }
       );
     }

@@ -8,20 +8,35 @@ interface AuthContextType {
   logout: () => void;
 }
 
+const getExtensionToken = (): Promise<string | null> => {
+  return new Promise((resolve) => {
+    chrome.storage.local.get(['authToken'], (result) => {
+      if (chrome.runtime.lastError) {
+        console.error("Error getting token:", chrome.runtime.lastError);
+        resolve(null);
+      } else {
+        resolve(result.authToken || null);
+      }
+    });
+  });
+};
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
-    // Check for token on mount
-    chrome.storage.local.get(['authToken'], (result) => {
-      if (result.authToken) {
-        setToken(result.authToken);
+    const initializeAuth = async () => {
+      const extensionToken = await getExtensionToken();
+      if (extensionToken) {
+        setToken(extensionToken);
         setIsAuthenticated(true);
       }
-    });
+    };
+
+    initializeAuth();
 
     // Listen for auth state changes
     const messageListener = (message: ExtensionMessage) => {
