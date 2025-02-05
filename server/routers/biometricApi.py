@@ -73,19 +73,31 @@ API_KEY = "a8b75fa07ad77e26a7866d995ed329553927767b"
 async def verify_voices(data: Voice):
     voice1_path = None
     voice2_path = None
+    silence_path = None
     combined_path = None
+    file_list = None
     
     try:
-        # Create temp directory
-        os.makedirs(TEMP_DIR, exist_ok=True)
+        # Create temp directory with absolute path
+        temp_dir = os.path.abspath(TEMP_DIR)
+        os.makedirs(temp_dir, exist_ok=True)
         
-        # Set unique filenames with timestamp
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        voice1_path = os.path.join(TEMP_DIR, f'voice1_{timestamp}.webm')
-        voice2_path = os.path.join(TEMP_DIR, f'voice2_{timestamp}.webm')
-        combined_path = os.path.join(TEMP_DIR, f'combined_{timestamp}.webm')
+        # Generate silence file if it doesn't exist
+        silence_path = os.path.join(temp_dir, 'silence.webm')
+        if not os.path.exists(silence_path):
+            subprocess.run([
+                'ffmpeg', '-f', 'lavfi', '-i', 'anullsrc=r=44100:cl=mono', 
+                '-t', '5', '-c:a', 'libopus', silence_path
+            ], check=True)
 
-        # Download WebM files directly
+        # Create unique filenames
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        voice1_path = os.path.join(temp_dir, f'voice1_{timestamp}.webm')
+        voice2_path = os.path.join(temp_dir, f'voice2_{timestamp}.webm')
+        combined_path = os.path.join(temp_dir, f'combined_{timestamp}.webm')
+        file_list = os.path.join(temp_dir, f'files_{timestamp}.txt')
+
+        # Download files
         for url, path in [(data.voice1_path, voice1_path), (data.voice2_path, voice2_path)]:
             try:
                 async with aiohttp.ClientSession() as session:
@@ -96,21 +108,35 @@ async def verify_voices(data: Voice):
             except Exception as e:
                 raise HTTPException(status_code=400, detail=f"Failed to download {url}: {str(e)}")
 
-        # Process with Deepgram directly with WebM file
+        # Create file list for ffmpeg with absolute paths
+        with open(file_list, 'w') as f:
+            f.write(f"file '{os.path.abspath(voice1_path)}'\n")
+            f.write(f"file '{os.path.abspath(silence_path)}'\n")
+            f.write(f"file '{os.path.abspath(voice2_path)}'\n")
+
+        # Combine files using ffmpeg
         try:
-            response = transcribe_audio(voice1_path, API_KEY)
+            subprocess.run([
+                'ffmpeg', '-f', 'concat', '-safe', '0',
+                '-i', file_list,
+                '-c', 'copy',
+                combined_path
+            ], check=True)
+
+            # Process combined file with Deepgram
+            response = transcribe_audio(combined_path, API_KEY)
             if response:
                 is_same_speaker = verify_speaker(response)
-                return {"verified": is_same_speaker}
+                return {"verified": is_same_speaker, "response": response}
             else:
                 raise HTTPException(status_code=500, detail="Transcription failed")
-                
-        except Exception as e:
-            raise HTTPException(status_code=400, detail=f"Audio processing failed: {str(e)}")
+
+        except subprocess.CalledProcessError as e:
+            raise HTTPException(status_code=400, detail=f"Failed to combine audio files: {str(e)}")
             
     finally:
         # Cleanup files
-        for path in [voice1_path, voice2_path, combined_path]:
+        for path in [voice1_path, voice2_path, combined_path, file_list]:
             if path and os.path.exists(path):
                 try:
                     os.remove(path)
@@ -118,17 +144,7 @@ async def verify_voices(data: Voice):
                 except Exception as e:
                     logging.error(f"Failed to clean up {path}: {str(e)}")
 
-def combine_audio_with_delay(audio1, audio2, sample_rate, delay_seconds=6):
-    """Combine two audio samples with delay"""
-    delay_samples = int(delay_seconds * sample_rate)
-    silence = np.zeros((delay_samples,), dtype=np.int16)
-    combined = np.concatenate([audio1.flatten(), silence, audio2.flatten()])
-    return combined.reshape(-1, 1)
 
-def save_audio(audio_data, sample_rate, filename):
-    """Save audio data to a WAV file"""
-    webm.write(filename, sample_rate, audio_data)
-    return filename
 
 def transcribe_audio(filepath, api_key):
 
@@ -146,7 +162,7 @@ def transcribe_audio(filepath, api_key):
             model="nova-2",
             diarize=True,
             utterances=True,
-            utt_split = 5,
+            utt_split = 3,
             # punctuate=True,
         )
         print("Transcribing audio...")
@@ -169,12 +185,12 @@ def verify_speaker(response):
         speakers = []
         for utterance in utterances:
             speaker_id = utterance['speaker']
-            confidence = utterance['speaker_confidence']
             
             # Assign speaker ID 1 if confidence is low
-            if confidence < 0.50:
-                speaker_id = 1
+            
             speakers.append(speaker_id)
+
+            
 
         # Verify all speakers are the same
         return len(set(speakers)) == 1
