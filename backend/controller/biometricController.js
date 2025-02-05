@@ -188,8 +188,8 @@ const convertUrlToFile = async (url, type) => {
 
         return {
             buffer,
-            type:  'audio/webm',
-            name:  'stored.webm'
+            type:  'audio/wav',
+            name:  'stored.wav'
         };
 
     } catch (error) {
@@ -213,8 +213,8 @@ const prepareFileForMatching = async (file, type) => {
         case 'voice':
             return {
                 buffer: file.buffer,
-                type: 'audio/webm',
-                name: 'voice.webm'
+                type: 'audio/wav',
+                name: 'voice.wav'
             };
 
         default:
