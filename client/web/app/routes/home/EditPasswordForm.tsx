@@ -41,7 +41,7 @@ export default function EditPasswordForm() {
     e.preventDefault();
     
     // Basic validation
-    if (!formData.site || !formData.username || !formData.password) {
+    if (!formData.site || !formData.username || !formData.passwordEncrypted) {
       toast.error('Please fill in all required fields');
       return;
     }
@@ -92,7 +92,7 @@ export default function EditPasswordForm() {
       />
 
       <PasswordInput
-        value={formData.password || ''}
+        value={formData.passwordEncrypted || ''}
         onChange={(password) => setFormData(prev => ({ ...prev, password }))}
         required
       />

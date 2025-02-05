@@ -18,7 +18,6 @@ router.post('/add', addPassword);
 router.put('/update/:passwordId', updatePassword);
 router.get('/vault', getVault);
 router.delete('/delete/:passwordId', deletePassword);
-router.post('/import', saveImportedPasswords);
-
+router.post('/import-passwords', saveImportedPasswords);
 
 export default router; 
