@@ -29,18 +29,16 @@ app.use((req, res, next) => {
 });
 
 // Test endpoint to verify server is running
-app.get('/api/test', (req, res) => {
+app.get('/test', (req, res) => {
   res.json({ message: 'Server is running' });
 });
 
 // Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/vault', vaultRoutes);
+app.use('/auth', authRoutes);
+app.use('/vault', vaultRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-  console.log('Available routes:');
-  console.log('- /api/auth/*');
-  console.log('- /api/vault/*');
+
 });
