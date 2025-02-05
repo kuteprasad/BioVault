@@ -80,10 +80,29 @@ class PasswordService {
     }
   }
 
-  async updatePassword(
-    passwordId: string, 
-    updates: Partial<PasswordEntry>
-  ): Promise<PasswordEntry> {
+  async getPasswordById(entryId: string): Promise<PasswordEntry | null> {
+    try {
+      const token = getToken();
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      const response = await api.get(`${this.baseUrl}/${entryId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      return response.data.password || null;
+    } catch (error: any) {
+      console.error('Error fetching password by ID:', error);
+      toast.error(error.response?.data?.message || 'Failed to fetch password');
+      throw error;
+    }
+  }
+
+  async updatePassword(passwordId: string, password: Partial<PasswordEntry>): Promise<PasswordEntry> {
     try {
       const token = getToken();
       console.log('Updating password:', {

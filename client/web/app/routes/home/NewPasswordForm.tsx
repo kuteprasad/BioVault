@@ -20,6 +20,7 @@ export default function NewPasswordForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Basic validation
     if (!formData.site || !formData.username || !formData.passwordEncrypted) {
       toast.error('Please fill in all required fields');
       return;
@@ -27,7 +28,7 @@ export default function NewPasswordForm() {
 
     try {
       const newEntry = await PasswordService.addPassword(formData);
-      console.log('New entry:', newEntry);
+      
       if (newEntry) {
         toast.success('New password entry created successfully');
         navigate('/');

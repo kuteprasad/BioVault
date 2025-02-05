@@ -4,11 +4,12 @@ import type { ExtensionMessage } from '../types/messages';
 interface AuthContextType {
   isAuthenticated: boolean;
   token: string | null;
+  userId: string | null; 
   login: (token: string) => void;
   logout: () => void;
 }
 
-const getExtensionToken = async (): Promise<string | null> => {
+export const getExtensionToken = async (): Promise<string | null> => {
   // First try to get token from extension storage
   const extensionToken = await new Promise<string | null>((resolve) => {
     chrome.storage.local.get(['authToken'], (result) => {
@@ -59,6 +60,17 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [token, setToken] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);  // Add this
+
+  const decodeToken = (token: string) => {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.userId;
+    } catch (error) {
+      console.error('Error decoding token:', error);
+      return null;
+    }
+  };
 
   useEffect(() => {
     const initializeAuth = async () => {
@@ -66,6 +78,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (extensionToken) {
         setToken(extensionToken);
         setIsAuthenticated(true);
+        setIsAuthenticated(true);
+        setUserId(decodeToken(extensionToken));
       }
     };
 
@@ -87,6 +101,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     chrome.storage.local.set({ authToken: newToken }, () => {
       setToken(newToken);
       setIsAuthenticated(true);
+      setUserId(decodeToken(newToken));  // Add this
     });
   };
 
@@ -94,11 +109,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     chrome.storage.local.remove('authToken', () => {
       setToken(null);
       setIsAuthenticated(false);
+      setUserId(null); 
     });
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, token, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, token, userId, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
