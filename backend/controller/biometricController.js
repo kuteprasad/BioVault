@@ -3,8 +3,12 @@ import dotenv from 'dotenv';
 import cloudinary from '../config/cloudinary.js';
 import { calculateMatchPercentage } from '../services/biometricServices.js';
 import axios from 'axios';
+import { createCanvas, Image, loadImage } from 'canvas';
+import * as faceapi from 'face-api.js';
 
 dotenv.config();
+
+
 
 const handlePhotoUpload = async (file) => {
     console.log("Uploading photo to Cloudinary...");
@@ -119,6 +123,23 @@ const saveBiometricData = async (req, res) => {
 
 
 
+const convertToImage = async (data, isUrl = false) => {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        
+        img.onerror = reject;
+        img.onload = () => resolve(img);
+        
+        if (isUrl) {
+            img.src = data;
+        } else {
+            // Convert buffer to base64
+            const base64 = Buffer.from(data).toString('base64');
+            img.src = `data:image/jpeg;base64,${base64}`;
+        }
+    });
+};
+
 const getBiometricData = async (userId, type) => {
 
     console.log(`Fetching stored ${type} biometric data for user:`, userId);
@@ -134,16 +155,43 @@ const getBiometricData = async (userId, type) => {
     return storedData[type === 'photo' ? 'face' : type];
 }
 
-const convertUrlToFile = async (url, type) => {
+const createCanvasFromImage = async (imageData, isUrl = false) => {
     try {
+        const img = await loadImage(isUrl ? imageData : `data:image/jpeg;base64,${imageData.toString('base64')}`);
+        const canvas = createCanvas(img.width, img.height);
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        return canvas;
+    } catch (error) {
+        console.error('Error creating canvas:', error);
+        throw new Error('Failed to create canvas from image');
+    }
+};
+
+const convertUrlToFile = async (url, type) => {
+    if (type === 'photo') {
+        return await createCanvasFromImage(url, true);
+    }
+    try {
+
+        if (type === 'photo') {
+            const image = await convertToImage(url, true);
+            return {
+                image,
+                type: 'image/jpeg',
+                name: 'stored.jpg'
+            };
+        }
+
         const response = await axios.get(url, { responseType: 'arraybuffer' });
         const buffer = Buffer.from(response.data);
 
         return {
             buffer,
-            type: type === 'photo' ? 'image/jpeg' : 'audio/webm',
-            name: type === 'photo' ? 'stored.jpg' : 'stored.webm'
+            type:  'audio/webm',
+            name:  'stored.webm'
         };
+
     } catch (error) {
         console.error('Error converting URL to file:', error);
         throw new Error(`Failed to convert ${type} URL to file`);
@@ -151,10 +199,14 @@ const convertUrlToFile = async (url, type) => {
 };
 
 const prepareFileForMatching = async (file, type) => {
+    if (type === 'photo') {
+        return await createCanvasFromImage(file.buffer);
+    }
     switch (type) {
         case 'photo':
+            const image = await convertToImage(file.buffer);
             return {
-                buffer: file.buffer,
+                image,
                 type: 'image/jpeg',
                 name: 'photo.jpg'
             };
@@ -199,11 +251,11 @@ const matchBiometricData = async (req, res) => {
 
         if (type !== 'fingerprint') {
             const storedFile = await convertUrlToFile(storedBiometric.cloudinaryUrl, type);
-            console.log("Converted stored URL to file:", storedFile);
+            // console.log("Converted stored URL to file:", storedFile);
 
             // Prepare file for matching
             const preparedFile = await prepareFileForMatching(file, type);
-            console.log("Prepared file for matching:", preparedFile);
+            // console.log("Prepared file for matching:", preparedFile);
 
             matchPercentage = await calculateMatchPercentage(storedFile, preparedFile, type);
 

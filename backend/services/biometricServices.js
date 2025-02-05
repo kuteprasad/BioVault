@@ -1,4 +1,3 @@
-
 import * as faceapi from 'face-api.js';
 import { compareFingerprints } from '../utils/fingerprintMatcher.js';
 import { voiceBiometricService } from './VoiceBiometricService.js';
@@ -18,20 +17,20 @@ export const initializeBiometricServices = async () => {
     }
 };
 
-export const compareImages = async (storedImage, uploadedImage) => {
+export const compareImages = async (storedCanvas, uploadedCanvas) => {
     try {
-        // Ensure models are loaded
-        initializeBiometricServices();
-        // await FaceModelLoader.getInstance();
+        console.log('Comparing faces...');
+        await initializeBiometricServices();
 
-        // Detect faces and compute descriptors
+            console.log('Face-API models loaded successfully');
+            
         const storedFace = await faceapi
-            .detectSingleFace(storedImage)
+            .detectSingleFace(storedCanvas)
             .withFaceLandmarks()
             .withFaceDescriptor();
 
         const uploadedFace = await faceapi
-            .detectSingleFace(uploadedImage)
+            .detectSingleFace(uploadedCanvas)
             .withFaceLandmarks()
             .withFaceDescriptor();
 
@@ -39,13 +38,11 @@ export const compareImages = async (storedImage, uploadedImage) => {
             throw new Error('Face not detected in one or both images');
         }
 
-        // Compare face descriptors
         const distance = faceapi.euclideanDistance(
             storedFace.descriptor,
             uploadedFace.descriptor
         );
 
-        // Convert distance to similarity percentage (0.6 is a typical threshold)
         const similarity = Math.max(0, 100 * (1 - distance / 0.6));
         return Math.min(100, similarity);
     } catch (error) {
