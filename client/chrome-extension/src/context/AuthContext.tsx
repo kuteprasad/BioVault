@@ -12,6 +12,7 @@ const getExtensionToken = async (): Promise<string | null> => {
   // First try to get token from extension storage
   const extensionToken = await new Promise<string | null>((resolve) => {
     chrome.storage.local.get(['authToken'], (result) => {
+      console.log("getting from extension")
       if (chrome.runtime.lastError) {
         console.error("Error getting token from extension:", chrome.runtime.lastError);
         resolve(null);

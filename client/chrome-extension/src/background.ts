@@ -1,6 +1,20 @@
 import type { ExtensionMessage } from "./types/messages";
 import { samplePasswords } from "./data/samplePasswords";
 
+// Add function to check if popup is open
+async function checkIfPopupIsOpen(): Promise<boolean> {
+  return new Promise((resolve) => {
+    chrome.windows.getAll({ populate: true }, (windows) => {
+      const popup = windows.find(window => 
+        window.type === 'popup' && 
+        window.tabs?.[0]?.url?.includes('chrome-extension://')
+      );
+      resolve(!!popup);
+    });
+  });
+}
+
+
 // Listen for form field focus events from content script
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
   console.log("DEBUG: Message received:", message);
@@ -24,21 +38,21 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 
       console.log("DEBUG: URL check result:", { url, hasMatchingPasswords });
 
-      // Only open popup if we have matching passwords
+
       if (hasMatchingPasswords) {
         try {
-          // Update the extension icon to indicate passwords available
-          chrome.action.setBadgeText({
+          // Update the extension icon
+          await chrome.action.setBadgeText({
             text: "✓",
             tabId: tabId,
           });
-
-          chrome.action.setBadgeBackgroundColor({
+        
+          await chrome.action.setBadgeBackgroundColor({
             color: "#7C3AED",
             tabId: tabId,
           });
-
-          // Store form data before opening popup
+        
+          // Store form data
           await new Promise<void>((resolve) => {
             chrome.storage.local.set({
               currentFormData: {
@@ -48,13 +62,17 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
               }
             }, () => resolve());
           });
-
-          // Open popup after data is stored
-          await new Promise<void>((resolve) => {
-            chrome.action.openPopup().then(() => resolve());
-          });
+        
+          // Check if popup is already open
+          const popupIsOpen = await checkIfPopupIsOpen();
+          
+          // Only open popup if it's not already open
+          if (!popupIsOpen) {
+            await chrome.action.openPopup();
+          }
           
           sendResponse({ success: true });
+        
         } catch (error) {
           console.error("DEBUG: Error handling matching passwords:", error);
           sendResponse({ 
@@ -79,7 +97,7 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
     });
   }
 
-  return true; 
+  return true;
 });
 
 // Handle login success message from main website
