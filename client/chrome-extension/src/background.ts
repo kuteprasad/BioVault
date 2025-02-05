@@ -79,21 +79,26 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
     });
   }
 
-  return true; // Keep message channel open for async response
+  return true; 
 });
 
 // Handle login success message from main website
 chrome.runtime.onMessageExternal.addListener((request: ExtensionMessage) => {
   try {
     if (request.type === "LOGIN_SUCCESS") {
+      console.log("Login success received with token:", request.token);
+      
+      // Store the token
       chrome.storage.local.set({ authToken: request.token }, () => {
         if (chrome.runtime.lastError) {
-          console.error("DEBUG: Error storing auth token:", chrome.runtime.lastError);
+          console.error("Error storing token:", chrome.runtime.lastError);
           return;
         }
+
+        // Notify extension about auth change
         chrome.runtime.sendMessage<ExtensionMessage>({
           type: "AUTH_CHANGED",
-          token: request.token,
+          token: request.token
         });
       });
     }
