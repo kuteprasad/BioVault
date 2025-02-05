@@ -1,8 +1,7 @@
 import { FC, useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import "./styles/scrollbar.css";
-import { samplePasswords } from "../../src/contentScript"
-import { PasswordEntry } from "../../src/contentScript";
+import { samplePasswords, PasswordEntry } from "../data/samplePasswords";
 
 
 
