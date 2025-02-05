@@ -24,7 +24,7 @@ app.use(express.json());
 
 // Routes
 app.use('/auth', authRoutes);
-app.use('/api/passwords', vaultRoutes);
+app.use('/vault', vaultRoutes);
 
 // Test endpoint
 app.get('/test', (req, res) => {
