@@ -3,7 +3,9 @@ import User from '../models/User.js';
 import crypto from 'crypto';
 
 export const addPassword = async (req, res) => {
-  const { userId, site, username, passwordEncrypted, notes } = req.body;
+  const userId = req.user.userId;
+    console.log('Adding password for user:', userId);
+  const { site, username, passwordEncrypted, notes } = req.body;
 
   try {
     const user = await User.findById(userId);
@@ -39,7 +41,9 @@ export const addPassword = async (req, res) => {
 };
 
 export const updatePassword = async (req, res) => {
-  const { userId, site, username, passwordEncrypted, notes } = req.body;
+  const userId = req.user.userId;
+  console.log('Updating password for user:', userId);
+  const { site, username, passwordEncrypted, notes } = req.body;
   const { passwordId } = req.params;
 
   try {
@@ -47,6 +51,7 @@ export const updatePassword = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
+    
 
     const vault = await Vault.findOne({ userId });
     if (!vault) {

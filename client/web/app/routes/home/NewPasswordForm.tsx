@@ -12,7 +12,7 @@ export default function NewPasswordForm() {
   const [formData, setFormData] = useState<Omit<PasswordEntry, 'id' | 'created_at' | 'updated_at'>>({
     site: '',
     username: '',
-    password: '',
+    passwordEncrypted: '',
     notes: ''
   });
   const navigate = useNavigate();
@@ -21,13 +21,13 @@ export default function NewPasswordForm() {
     e.preventDefault();
     
     // Basic validation
-    if (!formData.site || !formData.username || !formData.password) {
+    if (!formData.site || !formData.username || !formData.passwordEncrypted) {
       toast.error('Please fill in all required fields');
       return;
     }
 
     try {
-      const newEntry = await PasswordService.createPassword(formData);
+      const newEntry = await PasswordService.addPassword(formData);
       
       if (newEntry) {
         toast.success('New password entry created successfully');
@@ -62,8 +62,8 @@ export default function NewPasswordForm() {
       />
 
       <PasswordInput
-        value={formData.password}
-        onChange={(password) => setFormData(prev => ({ ...prev, password }))}
+        value={formData.passwordEncrypted}
+        onChange={(passwordEncrypted) => setFormData(prev => ({ ...prev, passwordEncrypted }))}
         required
       />
 
