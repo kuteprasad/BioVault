@@ -15,6 +15,7 @@ export const BiometricAuth: FC<BiometricAuthProps> = ({
   onSuccess,
   onError
 }) => {
+  console.log(setShowBiometricAuth)
   const [activePanel, setActivePanel] = useState<'fingerprint' | 'photo' | 'voice' | null>(null);
   // const [capturedData, setCapturedData] = useState<Blob | null>(null);
 
