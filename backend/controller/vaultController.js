@@ -74,7 +74,7 @@ export const updatePassword = async (req, res) => {
 };
 
 export const getVault = async (req, res) => {
-    const { userId } = req.body;
+    const { userId } = req.user;
   
     try {
       const user = await User.findById(userId);

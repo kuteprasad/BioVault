@@ -5,6 +5,8 @@ import "./styles/styles.css";
 import { samplePasswords, PasswordEntry } from "../data/samplePasswords";
 import { LogOut, Key, Copy, RefreshCw } from "lucide-react";
 
+import { getVault } from '../services/vaultService';
+
 interface PasswordOptions {
   uppercase: boolean;
   numbers: boolean;
@@ -12,7 +14,7 @@ interface PasswordOptions {
 }
 
 const Home: FC = () => {
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, userId, logout } = useAuth();
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [_currentUrl, setCurrentUrl] = useState<string>("");
   const [filteredPasswords, setFilteredPasswords] = useState<PasswordEntry[]>(
@@ -27,7 +29,43 @@ const Home: FC = () => {
     symbols: true,
   });
 
-  console.log(isAuthenticated);
+  console.log(isAuthenticated,userId);
+
+  useEffect(() => {
+    const fetchVault = async () => {
+      try {
+          useEffect(() => {
+    const fetchVault = async () => {
+      try {
+        console.log('Fetched vault data');
+        const vaultData = await getVault();
+        console.log('Fetched vault data:', vaultData);
+        
+      } catch (error) {
+        console.error('Error fetching vault:', error);
+      }
+    };
+
+   
+    if (isAuthenticated) {
+      console.log("this is runiing")
+      fetchVault();
+    }
+  }, [isAuthenticated]);
+        const vaultData = await getVault();
+        console.log('Fetched vault data:', vaultData);
+        
+      } catch (error) {
+        console.error('Error fetching vault:', error);
+      }
+    };
+
+   
+    if (isAuthenticated) {
+      console.log("this is runiing")
+      fetchVault();
+    }
+  }, [isAuthenticated]);
 
   // Get current tab URL when component mounts
   useEffect(() => {
