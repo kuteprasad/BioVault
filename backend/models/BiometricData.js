@@ -3,16 +3,16 @@ import mongoose from 'mongoose';
 const biometricDataSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   face: {
-    cloudinaryId: String,
+    cloudinaryUrl: String,
     metadata: {
       resolution: String,
       format: String
     }
   },
   voice: {
-    cloudinaryId: String,
+    cloudinaryUrl: String,
     metadata: {
-      length: String,
+      duration: Number,
       format: String
     }
   },
