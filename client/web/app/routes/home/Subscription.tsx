@@ -42,7 +42,7 @@ const plans = [
     price: '$9.99',
     period: 'per user/month',
     icon: <Zap className="h-8 w-8 text-blue-600" />,
-    image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&auto=format&fit=crop&q=60',
+    image: 'https://images.unsplash.com/photo-1560732488-6b0df240254a?w=800&auto=format&fit=crop&q=60&fit=crop&w=800&h=400',
     features: [
       'Everything in Pro',
       'Team management',
