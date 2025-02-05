@@ -2,6 +2,7 @@ import BiometricData from '../models/BiometricData.js';
 import dotenv from 'dotenv';
 import cloudinary from '../config/cloudinary.js';
 import { calculateMatchPercentage } from '../services/biometricServices.js';
+import axios from 'axios';
 
 dotenv.config();
 
