@@ -108,29 +108,29 @@ export default function ViewVaults() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-6 space-y-6 bg-gray-50 min-h-screen">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">My Password Vault</h1>
-        <button
-          onClick={() => navigate('/new-password')}
-          className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white 
-            rounded-lg hover:bg-purple-700 transition-colors duration-200 shadow-md hover:shadow-lg"
-        >
-          <Plus className="h-5 w-5" />
-          Add New Password
-        </button>
-      </div>
+    <div className="h-[550px] flex flex-col space-y-6">
+    <div className="flex items-center justify-between">
+      <h1 className="text-3xl font-bold text-gray-900">My Password Vault</h1>
+      <button
+        onClick={() => navigate('/new-password')}
+        className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white 
+          rounded-lg hover:bg-purple-700 transition-colors duration-200 shadow-md hover:shadow-lg"
+      >
+        <Plus className="h-5 w-5" />
+        Add New Password
+      </button>
+    </div>
 
-      {passwords.length === 0 ? (
-        <div className="text-center py-12 bg-white rounded-2xl shadow-xl">
-          <p className="text-gray-500 text-lg">
-            No passwords saved yet. Add your first password!
-          </p>
-        </div>
+    {passwords.length === 0 ? (
+    <div className="text-center py-12 bg-white rounded-2xl shadow-xl">
+      <p className="text-gray-500 text-lg">
+        No passwords saved yet. Add your first password!
+      </p>
+    </div>
       ) : (
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-200">
-          <div className="overflow-x-auto">
-            <table className="min-w-full">
+        <div className="flex-1 bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
+        <div className="h-full overflow-auto">
+          <table className="min-w-full">
               <thead className="bg-purple-50 border-b border-gray-200">
                 <tr>
                   {['Site', 'Username', 'Password', 'Notes', 'Last Updated', 'Actions'].map((header) => (
