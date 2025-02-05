@@ -55,15 +55,13 @@ class PasswordService {
   async addPassword(passwordData: Omit<PasswordEntry, '_id' | 'createdAt' | 'updatedAt'>): Promise<PasswordEntry> {
     try {
       const token = getToken();
+      if (!token) throw new Error('No authentication token found');
+
       console.log('Adding new password:', {
         site: passwordData.site,
         username: passwordData.username,
         hasNotes: !!passwordData.notes
       });
-
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
 
       const response = await api.post(`${this.baseUrl}/add`, passwordData, {
         headers: {
@@ -72,18 +70,11 @@ class PasswordService {
         }
       });
 
-      console.log('Add password response:', {
-        status: response.status,
-        newPassword: response.data.vault?.passwords?.slice(-1)[0]
-      });
-
+      console.log('Add password response:', response.data);
       toast.success('Password added successfully');
       return response.data.vault.passwords.slice(-1)[0];
     } catch (error: any) {
-      console.error('Add password error:', {
-        message: error.message,
-        response: error.response?.data
-      });
+      console.error('Add password error:', error);
       toast.error(error.response?.data?.message || 'Failed to add password');
       throw error;
     }
@@ -91,7 +82,7 @@ class PasswordService {
 
   async updatePassword(
     passwordId: string, 
-    updates: Partial<Omit<PasswordEntry, '_id' | 'createdAt' | 'updatedAt'>>
+    updates: Partial<PasswordEntry>
   ): Promise<PasswordEntry> {
     try {
       const token = getToken();
@@ -195,6 +186,48 @@ class PasswordService {
       });
       
       toast.error(error.response?.data?.message || 'Failed to import passwords');
+      throw error;
+    }
+  }
+
+  async getPasswordById(passwordId: string): Promise<PasswordEntry | null> {
+    try {
+      const token = getToken();
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      console.log('Fetching password by ID:', passwordId);
+      
+      const response = await api.get(`${this.baseUrl}/get-password/${passwordId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      console.log('Get password by ID response:', {
+        status: response.status,
+        data: response.data
+      });
+
+      // Return the password entry from the vault
+      const password = response.data.vault.passwords.find(
+        (p: PasswordEntry) => p._id === passwordId
+      );
+
+      if (!password) {
+        console.log('Password not found in vault');
+        return null;
+      }
+
+      return password;
+    } catch (error: any) {
+      console.error('Get password by ID error:', {
+        message: error.message,
+        response: error.response?.data
+      });
+      toast.error(error.response?.data?.message || 'Failed to fetch password');
       throw error;
     }
   }

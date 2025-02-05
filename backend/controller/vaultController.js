@@ -3,22 +3,20 @@ import User from '../models/User.js';
 import crypto from 'crypto';
 
 export const addPassword = async (req, res) => {
-  const { userId, site, username, passwordEncrypted, notes } = req.body;
-
   try {
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
+    const userId = req.user.userId;
+    const { site, username, passwordEncrypted, notes } = req.body;
+    
+    console.log('Adding password:', {
+      userId,
+      site,
+      username,
+      hasNotes: !!notes
+    });
 
-    let vault = await Vault.findOne({ userId });
+    const vault = await Vault.findOne({ userId });
     if (!vault) {
-      const encryptionKey = crypto.randomBytes(32).toString('hex');
-      vault = new Vault({ 
-        userId, 
-        passwords: [], 
-        encryption_key: encryptionKey 
-      });
+      return res.status(404).json({ message: 'Vault not found' });
     }
 
     const newPassword = {
@@ -26,15 +24,24 @@ export const addPassword = async (req, res) => {
       username,
       passwordEncrypted,
       notes,
+      createdAt: new Date(),
+      updatedAt: new Date()
     };
 
     vault.passwords.push(newPassword);
     await vault.save();
 
-    res.status(201).json({ message: 'Password added successfully', vault });
+    console.log('Password added successfully');
+    res.status(201).json({ 
+      message: 'Password added successfully',
+      vault 
+    });
   } catch (error) {
     console.error('Error adding password:', error);
-    res.status(500).json({ message: 'Error adding password', error });
+    res.status(500).json({ 
+      message: 'Error adding password', 
+      error: error.message 
+    });
   }
 };
 

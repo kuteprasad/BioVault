@@ -24,7 +24,11 @@ app.use(express.json());
 
 // Debug middleware to log all requests
 app.use((req, res, next) => {
-  console.log('Request received:', req.method, req.path);
+  console.log('Request received:', {
+    method: req.method,
+    path: req.path,
+    body: req.method === 'POST' ? req.body : undefined
+  });
   next();
 });
 

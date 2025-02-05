@@ -9,10 +9,10 @@ import { PasswordInput } from '../../components/formComponents/PasswordInput';
 import { TextareaInput } from '../../components/formComponents/TextareaInput';
 
 export default function NewPasswordForm() {
-  const [formData, setFormData] = useState<Omit<PasswordEntry, 'id' | 'created_at' | 'updated_at'>>({
+  const [formData, setFormData] = useState<Omit<PasswordEntry, '_id' | 'createdAt' | 'updatedAt'>>({
     site: '',
     username: '',
-    password: '',
+    passwordEncrypted: '',
     notes: ''
   });
   const navigate = useNavigate();
@@ -20,15 +20,14 @@ export default function NewPasswordForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Basic validation
-    if (!formData.site || !formData.username || !formData.password) {
+    if (!formData.site || !formData.username || !formData.passwordEncrypted) {
       toast.error('Please fill in all required fields');
       return;
     }
 
     try {
-      const newEntry = await PasswordService.createPassword(formData);
-      
+      const newEntry = await PasswordService.addPassword(formData);
+      console.log('New entry:', newEntry);
       if (newEntry) {
         toast.success('New password entry created successfully');
         navigate('/');
@@ -62,8 +61,8 @@ export default function NewPasswordForm() {
       />
 
       <PasswordInput
-        value={formData.password}
-        onChange={(password) => setFormData(prev => ({ ...prev, password }))}
+        value={formData.passwordEncrypted}
+        onChange={(passwordEncrypted) => setFormData(prev => ({ ...prev, passwordEncrypted }))}
         required
       />
 

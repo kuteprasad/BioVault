@@ -40,15 +40,19 @@ export default function EditPasswordForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Basic validation
-    if (!formData.site || !formData.username || !formData.password) {
+    if (!formData.site || !formData.username || !formData.passwordEncrypted) {
       toast.error('Please fill in all required fields');
       return;
     }
 
     try {
       if (id) {
-        const updatedEntry = await PasswordService.updatePassword(id, formData);
+        const updatedEntry = await PasswordService.updatePassword(id, {
+          site: formData.site,
+          username: formData.username,
+          passwordEncrypted: formData.passwordEncrypted,
+          notes: formData.notes
+        });
         
         if (updatedEntry) {
           toast.success('Password entry updated successfully');
@@ -92,8 +96,8 @@ export default function EditPasswordForm() {
       />
 
       <PasswordInput
-        value={formData.password || ''}
-        onChange={(password) => setFormData(prev => ({ ...prev, password }))}
+        value={formData.passwordEncrypted || ''}
+        onChange={(passwordEncrypted) => setFormData(prev => ({ ...prev, passwordEncrypted }))}
         required
       />
 
