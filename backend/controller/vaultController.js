@@ -147,35 +147,41 @@ export const getPasswordById = async (req, res) => {
 };
 
 export const deletePassword = async (req, res) => {
-    const { userId } = req.body;
+    const userId = req.user.userId;
     const { passwordId } = req.params;
   
-    try {
+  try {
+      console.log("User:", userId);
+      console.log('Deleting password:', passwordId);
       const user = await User.findById(userId);
-      if (!user) {
+    if (!user) {
+        console.log('User not found:', userId);
         return res.status(404).json({ message: 'User not found' });
       }
   
       const vault = await Vault.findOne({ userId });
-      if (!vault) {
+    if (!vault) {
+        console.log('Vault not found for user:', userId);
         return res.status(404).json({ message: 'Vault not found' });
       }
   
       const passwordEntry = vault.passwords.id(passwordId);
-      if (!passwordEntry) {
+    if (!passwordEntry) {
+        console.log('Password entry not found for passwordId:', passwordId);
         return res.status(404).json({ message: 'Password entry not found' });
       }
   
       vault.passwords.pull({ _id: passwordId });
       await vault.save();
   
+      console.log('Password deleted successfully:', passwordId);
       res.status(200).json({ message: 'Password deleted successfully', vault });
     } catch (error) {
         console.error('Error deleting password:', error);
         res.status(500).json({ message: 'Error deleting password', error });
       }
 };
-
+  
 export const saveImportedPasswords = async (req, res) => {
   console.log('Import request received:', {
     passwordCount: req.body.passwords?.length,

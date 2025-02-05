@@ -99,7 +99,7 @@ export default function EditPasswordForm() {
 
       <PasswordInput
         value={formData.passwordEncrypted || ''}
-        onChange={(password) => setFormData(prev => ({ ...prev, password }))}
+        onChange={(passwordEncrypted) => setFormData(prev => ({ ...prev, passwordEncrypted }))}
         required
       />
 
