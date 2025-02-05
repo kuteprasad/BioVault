@@ -15,9 +15,10 @@ router.use(authMiddleware);
 
 // Vault routes
 router.post('/add', addPassword);
-router.put('/update/:passwordId', updatePassword);
+router.put('/update-password/:passwordId', updatePassword);
 router.get('/vault', getVault);
-router.delete('/delete/:passwordId', deletePassword);
+router.delete('/delete-password/:passwordId', deletePassword);
 router.post('/import-passwords', saveImportedPasswords);
+
 
 export default router; 

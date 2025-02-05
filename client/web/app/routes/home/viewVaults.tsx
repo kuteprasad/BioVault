@@ -38,7 +38,7 @@ const samplePasswords: PasswordEntry[] = [
 
 export default function ViewVaults() {
   const [passwords, setPasswords] = useState<PasswordEntry[]>([]);
-  const [visiblePasswords, setVisiblePasswords] = useState<Set<string>>(new Set());
+  const [visiblePasswordId, setVisiblePasswordId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -61,15 +61,8 @@ export default function ViewVaults() {
   };
 
   const togglePasswordVisibility = (passwordId: string) => {
-    setVisiblePasswords(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(passwordId)) {
-        newSet.delete(passwordId);
-      } else {
-        newSet.add(passwordId);
-      }
-      return newSet;
-    });
+    console.log('Toggling visibility for password:', passwordId);
+    setVisiblePasswordId(prev => prev === passwordId ? null : passwordId);
   };
 
   const copyToClipboard = (text: string, type: string) => {

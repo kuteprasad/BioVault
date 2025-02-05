@@ -9,7 +9,7 @@ import { PasswordInput } from '../../components/formComponents/PasswordInput';
 import { TextareaInput } from '../../components/formComponents/TextareaInput';
 
 export default function NewPasswordForm() {
-  const [formData, setFormData] = useState<Omit<PasswordEntry, 'id' | 'created_at' | 'updated_at'>>({
+  const [formData, setFormData] = useState<Omit<PasswordEntry, '_id' | 'createdAt' | 'updatedAt'>>({
     site: '',
     username: '',
     passwordEncrypted: '',

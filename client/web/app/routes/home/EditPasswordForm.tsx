@@ -48,7 +48,12 @@ export default function EditPasswordForm() {
 
     try {
       if (id) {
-        const updatedEntry = await PasswordService.updatePassword(id, formData);
+        const updatedEntry = await PasswordService.updatePassword(id, {
+          site: formData.site,
+          username: formData.username,
+          passwordEncrypted: formData.passwordEncrypted,
+          notes: formData.notes
+        });
         
         if (updatedEntry) {
           toast.success('Password entry updated successfully');
