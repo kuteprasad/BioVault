@@ -34,7 +34,7 @@ export const compareVoiceFastApi = async (storedUrl, preparedUrl) => {
 
         console.log("asdfghj    kjahsdkjah kajdhskajs",response.data)
 
-        return response.data;
+        return response.data.verified;
     } catch (error) {
         console.error('Error comparing voices:', error);
         throw error;

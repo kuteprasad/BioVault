@@ -7,15 +7,18 @@ interface BiometricAuthProps {
   setShowBiometricAuth: (show: boolean) => void;
   onSuccess: (data: { blob: Blob; type: string }) => void;
   onError: (error: string) => void;
+  bioAuthendicated: boolean;
 }
 
 export const BiometricAuth: FC<BiometricAuthProps> = ({
   showBiometricAuth,
   setShowBiometricAuth,
   onSuccess,
-  onError
+  onError,
+  bioAuthendicated
 }) => {
   console.log(setShowBiometricAuth)
+  console.log("bioAuthResponssdsdfsdfde", bioAuthendicated)
   const [activePanel, setActivePanel] = useState<'fingerprint' | 'photo' | 'voice' | null>(null);
   // const [capturedData, setCapturedData] = useState<Blob | null>(null);
 
@@ -33,8 +36,11 @@ export const BiometricAuth: FC<BiometricAuthProps> = ({
               <div key={type} className="border rounded-lg overflow-hidden">
                 <button
                   onClick={() => handlePanelClick(type as 'fingerprint' | 'photo' | 'voice')}
-                  className="w-full flex items-center justify-between p-3 text-left 
-                    hover:bg-purple-50 transition-colors"
+                  className={`w-full flex items-center justify-between p-3 text-left transition-colors
+                    ${bioAuthendicated 
+                      ? 'bg-green-50 hover:bg-green-100' 
+                      : 'hover:bg-purple-50'
+                    }`}
                 >
                   <div className="flex items-center gap-2">
                     {type === 'fingerprint' && <Fingerprint className="w-4 h-4" />}
