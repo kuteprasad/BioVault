@@ -30,7 +30,7 @@ const AddBiometrics = () => {
       console.log('blob data', data.blob);
       console.log('FormData:', formData);
 
-      // Simulating backend upload (Replace with actual API call)
+      
       await saveBiometricData(formData);
 
       // Add biometric type to state
