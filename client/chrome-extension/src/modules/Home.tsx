@@ -33,12 +33,15 @@ const Home: FC = () => {
     numbers: true,
     symbols: true,
   });
+  const [selectedPassword, setSelectedPassword] = useState<PasswordEntry>({} as PasswordEntry);
 
 
   // Add new state after other states
   const [showBiometricAuth, setShowBiometricAuth] = useState(false);
   const [bioAuthResponse, setBioAuthResponse] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  
 
   const showError = (message: string) => {
     setError(message);
@@ -140,12 +143,10 @@ const Home: FC = () => {
       // For now, just show a temporary message
       // Later this will be replaced with actual biometric authentication
       setShowBiometricAuth(true);
+      setSelectedPassword(password);
       // const confirmAuth = window.confirm("Authenticate to fill password?");
+      
 
-      if (bioAuthResponse) {
-        // Proceed with filling password after successful authentication
-        handleFillPassword(password);
-      }
 
     } catch (error) {
       console.error("Authentication failed:", error);
@@ -187,9 +188,13 @@ const Home: FC = () => {
     formData.append("type", data.type);
 
     const response = await matchBiometricData(formData);
-    console.log("Biometric match response:", response);
+    
     //assume response will be true or false... 
     setBioAuthResponse(response.verified);
+    if (bioAuthResponse) {
+      // Proceed with filling password after successful authentication
+      handleFillPassword(selectedPassword);
+    }
 
     setShowBiometricAuth(false);
     
