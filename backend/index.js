@@ -16,9 +16,12 @@ connectDB();
 // Middleware to parse JSON request bodies
 app.use(bodyParser.json());
 app.use(cors({
-  origin: 'http://localhost:5173', // Replace with your frontend URL
+  // Remove the trailing slash from the origin
+  origin: 'https://5zngffqh-5173.inc1.devtunnels.ms',
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   credentials: true,
+  // Add additional CORS headers
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use(express.json());
