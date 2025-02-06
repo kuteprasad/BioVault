@@ -89,6 +89,25 @@ export const matchBiometricData = async (formData: FormData) => {
   }
 };
 
+export const isFaceDetected = async (formData: FormData) => {
+  try {
+    const token = getToken();
+    console.log("reached match bio data",formData.get('biometricData'));
+    const response = await axios.post(`http://localhost:3000/auth/biometrics/${formData.get('type')}/is-face-detected`, formData, 
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+    console.log("response in match bio data: ", response);
+    return response.data;
+  } catch (error) {
+    console.error("Error in match bio data:", error);
+    throw error;
+  }
+}
 
 // Fetch user profile
 export const fetchUserProfile = async () => {

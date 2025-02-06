@@ -4,7 +4,7 @@ import cloudinary from '../config/cloudinary.js';
 import { calculateMatch } from '../services/biometricServices.js';
 import axios from 'axios';
 import { createCanvas, Image, loadImage } from 'canvas';
-
+import { isFaceDetected } from '../utils/api.js';
 dotenv.config();
 
 
@@ -210,4 +210,25 @@ const matchBiometricData = async (req, res) => {
     }
 };
 
-export { saveBiometricData, matchBiometricData };
+const isFaceValid = async (req, res) => {
+    const file = req.file;
+    const { type } = req.params;
+  
+
+    try {
+        let updateData = await handlePhotoUpload(file);
+        const preparedFileUrl = updateData.face.cloudinaryUrl;
+        const response = await isFaceDetected(preparedFileUrl);
+        console.log("Face detection response:", response);
+        return res.status(200).json({
+            isFaceValid: response
+        });
+    } catch (error) {
+        return res.status(400).json({
+            error: error.message
+        });
+    }
+}
+
+
+export { saveBiometricData, matchBiometricData ,isFaceValid };

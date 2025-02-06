@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router';
 import { CheckCircle, ChevronDownIcon, ChevronUpIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import BiometricCapture from '../components/biometrics/BiometricCapture';
-import { saveBiometricData } from '~/services/authService';
+import { isFaceDetected, saveBiometricData } from '~/services/authService';
 
 type BiometricType = 'fingerprint' | 'photo' | 'voice' | null;
 
@@ -20,24 +20,31 @@ const AddBiometrics = () => {
   const handleBiometricSuccess = async (data: { blob: Blob; type: string }) => {
     try {
       setLoading(true);
-
+  
       // Create FormData and append the blob
       const formData = new FormData();
       formData.append('biometricData', data.blob);
       formData.append('type', data.type);
+  
+      // Only do face detection check for photo type
+      if (data.type === 'photo') {
+        const faceDetectionResponse = await isFaceDetected(formData);
+      
+        
+        if (!faceDetectionResponse.isFaceValid) {
+          toast.error('No face detected. Please upload a clear photo of your face.');
+          setLoading(false);
+          return;
+        }
+      }
 
-      console.log('Biometric data:', data.type);
-      console.log('blob data', data.blob);
-      console.log('FormData:', formData);
-
+      console.log("reached save bio data",formData);
       
       await saveBiometricData(formData);
-
-      // Add biometric type to state
       setAddedBiometrics((prev) => new Set(prev).add(data.type));
-
       toast.success(`${data.type} biometric added successfully!`);
       setActivePanel(null);
+  
     } catch (error) {
       toast.error(`Failed to save ${data.type} biometric`);
     } finally {

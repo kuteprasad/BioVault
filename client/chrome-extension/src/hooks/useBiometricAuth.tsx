@@ -22,6 +22,8 @@ export const useBiometricAuth = () => {
         formData.append("biometricData", data.blob);
         formData.append("type", data.type);
 
+        
+
         const response = await matchBiometricData(formData);
 
         setAuthState({

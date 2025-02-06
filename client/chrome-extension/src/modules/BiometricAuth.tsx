@@ -34,11 +34,11 @@ export const BiometricAuth: FC<BiometricAuthProps> = ({
 
   const handlePanelClick = (type: "fingerprint" | "photo" | "voice") => {
     setActivePanel(activePanel === type ? null : type);
-    setIsLoading(true);
+   
   };
 
   const handleCaptureSuccess = (data: { blob: Blob; type: string }) => {
-    setIsLoading(false);
+    setIsLoading(true);
     onSuccess(data);
   };
 

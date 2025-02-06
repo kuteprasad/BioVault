@@ -2,7 +2,7 @@ import express from 'express';
 import { sendOTP, verifyOTP, signup, login, getProfile, refreshAccessToken } from '../controller/authController.js';
 import authMiddleware from '../middleware/authMiddleware.js';
 import upload from '../config/multer.js';
-import { matchBiometricData, saveBiometricData } from '../controller/biometricController.js';
+import { matchBiometricData, saveBiometricData, isFaceValid } from '../controller/biometricController.js';
 
 const router = express.Router();
 
@@ -17,6 +17,12 @@ router.post('/biometrics/:type/match',
     authMiddleware,
     upload.single('biometricData'),
     matchBiometricData
+);
+
+router.post('/biometrics/:type/is-face-detected',
+    authMiddleware,
+    upload.single('biometricData'),
+    isFaceValid
 );
 
 router.get('/profile', authMiddleware, getProfile);

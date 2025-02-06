@@ -62,6 +62,7 @@ export const compareFingerprintFastApi = async (storedUrl, preparedUrl) => {
 
 export const isFaceDetected = async (imageUrl) => {
     try {
+        
         const response = await axios.post(`${process.env.FASTAPI_URL}/api/biometric/face-detect`, {
             imageUrl
         },
@@ -70,7 +71,9 @@ export const isFaceDetected = async (imageUrl) => {
                 'Content-Type': 'application/json'
             }
         });
-        return response.data;
+
+        console.log("asdfghj sdfsdfsdfsd   kjahsdkjah kajdhskajs",response.data)
+        return response.data.verified;
     } catch (error) {
         console.error('Error detecting face:', error);
         throw error;
