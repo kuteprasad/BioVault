@@ -3,6 +3,7 @@ import FingerprintCapture from './FingerprintCapture';
 import FaceCapture from './FaceCapture';
 import VoiceCapture from './VoiceCapture';
 
+
 // Define the type explicitly
 export type BiometricType = 'fingerprint' | 'photo' | 'voice';
 

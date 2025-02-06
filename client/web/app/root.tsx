@@ -5,7 +5,6 @@ import { getToken } from './utils/authUtils';
 import { logout } from './redux/authSlice';
 import { useEffect } from 'react';
 
-
 import {
   isRouteErrorResponse,
   Links,
@@ -55,7 +54,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 function AppWithAuth() {
   useEffect(() => {
-  const token = getToken();
+    // Check token on app initialization
+    const token = getToken();
     if (!token) {
       store.dispatch(logout());
     }
