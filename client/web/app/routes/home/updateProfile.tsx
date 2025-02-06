@@ -65,15 +65,15 @@ export default function UpdateProfile() {
     }
   };
 
-  const handleBiometricSuccess = async (data: { blob: Blob; type: string }) => {
-    try {
-      // API call to update biometric
-      toast.success(`${data.type} updated successfully!`);
-      setActiveBiometric(null);
-    } catch (error) {
-      toast.error(`Failed to update ${data.type}`);
-    }
-  };
+  // const handleBiometricSuccess = async (data: { blob: Blob; type: string }) => {
+  //   try {
+  //     // API call to update biometric
+  //     toast.success(`${data.type} updated successfully!`);
+  //     setActiveBiometric(null);
+  //   } catch (error) {
+  //     toast.error(`Failed to update ${data.type}`);
+  //   }
+  // };
 
   const handleSubmit = async () => {
     if (!formData.masterPassword) {
@@ -108,7 +108,7 @@ export default function UpdateProfile() {
 
   const handleLogout = () => {
     dispatch(logout());
-    navigate('/login');
+    // navigate('/login');
     toast.success('Logged out successfully');
   };
 
