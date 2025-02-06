@@ -101,6 +101,9 @@ const Home: FC = () => {
   const handleSettingsClick = () => {
     chrome.tabs.create({ url: "http://localhost:5173/settings" });
   };
+  const handleHomeClick = () => {
+    chrome.tabs.create({ url: "http://localhost:5173/" });
+  };
   const handelImportPassClick = () => {
     chrome.tabs.create({ url: "http://localhost:5173/import-passwords" });
   };
@@ -211,7 +214,7 @@ const Home: FC = () => {
 
         <div className="relative backdrop-blur-sm bg-white/70 rounded-xl p-4 shadow-xl border border-white/50">
           <div className="text-center space-y-3">
-            <div className="flex items-center justify-center gap-2 text-purple-800 mb-4">
+            <button onClick={handleHomeClick} className="flex items-center justify-center gap-2 text-purple-800 mb-4">
               <div className="p-1.5 bg-purple-100 rounded-lg shadow-inner">
                 <img
                   src="/icons/shield.svg"
@@ -222,7 +225,7 @@ const Home: FC = () => {
               <span className="font-semibold text-lg tracking-tight">
                 BioVault
               </span>
-            </div>
+            </button>
             <p className="text-gray-600 text-sm">
               Please login to access your passwords
             </p>

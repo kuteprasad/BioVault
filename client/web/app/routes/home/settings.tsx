@@ -1,18 +1,42 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Sun, Moon, Monitor, Palette, ShieldCheck, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
+import { updateUserProfile, fetchUserProfile } from '../../services/userService';
 
 type ThemeMode = 'light' | 'dark' | 'system';
-type ReverifyPeriod = '1d' | '7d' | '30d';
+type ReverifyPeriod = '10m' | '1h' | '1d' | '7d' | '30d';
 
 export default function Settings() {
   const [themeMode, setThemeMode] = useState<ThemeMode>('system');
   const [theme, setTheme] = useState('purple');
   const [reverifyPeriod, setReverifyPeriod] = useState<ReverifyPeriod>('7d');
 
-  const handleSaveSettings = () => {
-    // API call to save settings
-    toast.success('Settings saved successfully');
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const profile = await fetchUserProfile();
+        setReverifyPeriod(
+          profile.reVerificationInterval === '10m' ? '10m' :
+          profile.reVerificationInterval === '60m' ? '1h' :
+          profile.reVerificationInterval === '1440m' ? '1d' :
+          profile.reVerificationInterval === '10080m' ? '7d' : '30d'
+        );
+      } catch (error) {
+        toast.error('Failed to fetch profile');
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
+  const handleSaveSettings = async () => {
+    try {
+      const reVerificationInterval = reverifyPeriod === '10m' ? '10m' : reverifyPeriod === '1h' ? '60m' : reverifyPeriod === '1d' ? '1440m' : reverifyPeriod === '7d' ? '10080m' : '43200m';
+      await updateUserProfile({ reVerificationInterval });
+      toast.success('Settings saved successfully');
+    } catch (error) {
+      toast.error('Failed to save settings');
+    }
   };
 
   return (
@@ -109,6 +133,8 @@ export default function Settings() {
               className="w-full pl-10 pr-10 py-2 appearance-none border border-gray-200 
                 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
             >
+              <option value="10m">Every 10 Minutes</option>
+              <option value="1h">Every Hour</option>
               <option value="1d">Every Day</option>
               <option value="7d">Every Week</option>
               <option value="30d">Every Month</option>

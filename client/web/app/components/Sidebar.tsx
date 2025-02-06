@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { NavLink, useNavigate } from "react-router-dom";
-import type{ AppDispatch, RootState } from "../redux/store";
+import type { AppDispatch, RootState } from "../redux/store";
 import { fetchProfile, logout } from "../redux/authSlice";
 import {
   ShieldCheck,
@@ -16,13 +16,11 @@ import {
   Loader,
   LogOut,
   Crown,
-  Home,
-  Key,
-  CreditCard,
 } from "lucide-react";
 
 const ProfileSection: React.FC<{ isOpen: boolean }> = ({ isOpen }) => {
   const { userData, loading } = useSelector((state: RootState) => state.auth);
+
   const dispatch = useDispatch<AppDispatch>();
 
   useEffect(() => {
@@ -78,7 +76,7 @@ const Sidebar: React.FC = () => {
   const navItems = [
     { path: "/", icon: <ShieldCheck className="h-6 w-6" />, label: "My Vault" },
     { path: "/settings", icon: <Settings className="h-6 w-6" />, label: "Settings" },
-    { path: "/import-passwords", icon: <Lock className="h-6 w-6" />, label: "Passwords" },
+    { path: "/import-passwords", icon: <Lock className="h-6 w-6" />, label: "Import Passwords" },
     { path: "/match-biometrics", icon: <FilePlus className="h-6 w-6" />, label: "Match Biometrics" },
     { path: "/subscription", icon: <Crown className="h-6 w-6" />, label: "Subscription" },
   ];
@@ -93,14 +91,8 @@ const Sidebar: React.FC = () => {
     setIsLoading(true);
     try {
       // Perform logout logic here
-       // Delete the JWT token from localStorage
-       localStorage.removeItem('jwtToken');
-
-      // Navigate to /home1 and show loading indicator
-      navigate('/home1', { replace: true });
-
-      // Optional: Reload the page to clear all states
-      window.location.reload();
+      dispatch(logout());
+      navigate("/");
     } catch (error) {
       console.error('Logout error:', error);
       // Show error toast or message
@@ -179,17 +171,28 @@ const Sidebar: React.FC = () => {
                      rounded-lg hover:bg-red-50 hover:text-red-600 
                      transition-all duration-200 group disabled:opacity-50"
           >
-            {isLoading ? (
-              <>
+            
+             
+              
+              {isLoading ? (
+                <>
                 <Loader className="h-5 w-5 animate-spin" />
-                <span>Logging out...</span>
-              </>
-            ) : (
-              <>
+                {isOpen && (
+                 
+                  <span>Logging out...</span>
+
+                )}
+                </>
+              ) : (
+                <>
                 <LogOut className="h-5 w-5 group-hover:rotate-180 transition-transform duration-300" />
-                <span>Logout</span>
-              </>
-            )}
+                {isOpen && (
+                  <span>Logout</span>
+
+                )}
+                </>
+           
+              )}
           </button>
         </div>
       </nav>

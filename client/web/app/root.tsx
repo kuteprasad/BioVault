@@ -39,9 +39,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>BioVault</title> 
+        <title>BioVault</title>
         <Meta />
         <Links />
+        <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="shortcut icon" href="/favicon.ico" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+        <meta name="apple-mobile-web-app-title" content="BioVault" />
+        <link rel="manifest" href="/site.webmanifest" />
+
       </head>
       <body>
         {children}
@@ -63,10 +70,10 @@ function AppWithAuth() {
 
   return (
     <>
-      <Toaster 
-        position="top-right" 
-        expand={false} 
-        richColors 
+      <Toaster
+        position="top-right"
+        expand={false}
+        richColors
         closeButton
       />
       <Outlet />
@@ -105,17 +112,17 @@ export function ErrorBoundary() {
         <div className="flex justify-center">
           <ExclamationTriangleIcon className="h-16 w-16 text-purple-500" />
         </div>
-        
+
         <h1 className="text-3xl font-bold text-gray-900">{message}</h1>
-        
+
         <p className="text-lg text-gray-600">{details}</p>
-        
+
         {stack && (
           <pre className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg text-left overflow-x-auto text-sm">
             <code className="text-gray-700">{stack}</code>
           </pre>
         )}
-        
+
         <a
           href="/"
           className="mt-8 inline-flex items-center px-6 py-3 bg-purple-600 hover:bg-purple-700 
