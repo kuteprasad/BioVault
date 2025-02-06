@@ -29,8 +29,11 @@
     "concurrently": "^8.2.2"
   },
   "dependencies": {
+    "@remix-run/node": "^2.15.3",
+    "@remix-run/react": "^2.15.3",
     "bcrypt": "^5.1.1",
     "biovault": "file:",
-    "node": "^23.7.0"
+    "node": "^23.7.0",
+    "react-router-dom": "^6.15.0"
   }
 }
