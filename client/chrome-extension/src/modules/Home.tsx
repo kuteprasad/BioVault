@@ -135,23 +135,13 @@ const Home: FC = () => {
   };
 
   const handleAuthBeforeFill = async (password: PasswordEntry) => {
-    try {
-
-      // This is where we'll add the authentication API call later
+     if (!bioAuthResponse){
       console.log("Initiating auth before fill for:", password.site);
-      
-      // For now, just show a temporary message
-      // Later this will be replaced with actual biometric authentication
+
       setShowBiometricAuth(true);
-      setSelectedPassword(password);
-      // const confirmAuth = window.confirm("Authenticate to fill password?");
-      
-
-
-    } catch (error) {
-      console.error("Authentication failed:", error);
-      // We can add proper error handling here later
-    }
+     } else {
+      handleFillPassword(password);
+     }
   };
 
   const handlePasswordOptionChange = (key: keyof PasswordOptions) => {
