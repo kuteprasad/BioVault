@@ -1,4 +1,5 @@
 import User from '../models/User.js';
+import Settings from '../models/Settings.js';
 import jwt from 'jsonwebtoken';
 import { sendEmail } from '../utils/sendEmail.js';
 import dotenv from 'dotenv';
@@ -77,11 +78,14 @@ const login = async (req, res) => {
       return res.status(401).json({ message: 'Invalid Password' });
     }
 
+    const settings = await Settings.findOne({ userId: user._id });
+    const reVerificationInterval = settings ? settings.reVerificationInterval : '1440m';
+
     // Generate token with shorter expiration time and refresh token
     const token = jwt.sign(
       { userId: user._id },
       process.env.SECRET_KEY,
-      { expiresIn: process.env.ACCESS_TOKEN_EXPIRY }
+      { expiresIn: reVerificationInterval }
     );
 
     const refreshToken = jwt.sign(

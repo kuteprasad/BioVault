@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import connectDB from './config/db.js';
 import authRoutes from './routes/auth.js';
 import vaultRoutes from './routes/vaultRoutes.js';
+import userRoutes from './routes/userRoutes.js';
 import bodyParser from 'body-parser';
 
 dotenv.config();
@@ -40,6 +41,7 @@ app.get('/test', (req, res) => {
 // Routes
 app.use('/auth', authRoutes);
 app.use('/password', vaultRoutes);
+app.use('/user', userRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
