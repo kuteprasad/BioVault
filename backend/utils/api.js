@@ -34,7 +34,7 @@ export const compareVoiceFastApi = async (storedUrl, preparedUrl) => {
 
         console.log("asdfghj    kjahsdkjah kajdhskajs",response.data)
 
-        return response.data;
+        return response.data.verified;
     } catch (error) {
         console.error('Error comparing voices:', error);
         throw error;
@@ -58,4 +58,22 @@ export const compareFingerprintFastApi = async (storedUrl, preparedUrl) => {
         console.error('Error comparing fingerprints:', error);
         throw error;
     }
+}
+
+export const isFaceDetected = async (imageUrl) => {
+    try {
+        const response = await axios.post(`${process.env.FASTAPI_URL}/api/biometric/face-detect`, {
+            imageUrl
+        },
+        {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error detecting face:', error);
+        throw error;
+    }
+
 }

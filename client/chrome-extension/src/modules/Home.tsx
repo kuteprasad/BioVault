@@ -24,7 +24,9 @@ const Home: FC = () => {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [currentUrl, setCurrentUrl] = useState<string>("");
   const [allPasswords, setAllPasswords] = useState<PasswordEntry[]>([]);
-  const [filteredPasswords, setFilteredPasswords] = useState<PasswordEntry[]>([]);
+  const [filteredPasswords, setFilteredPasswords] = useState<PasswordEntry[]>(
+    []
+  );
   const [showPasswordGenerator, setShowPasswordGenerator] = useState(false);
   const [passwordLength, setPasswordLength] = useState(16);
   const [generatedPassword, setGeneratedPassword] = useState("");
@@ -33,21 +35,20 @@ const Home: FC = () => {
     numbers: true,
     symbols: true,
   });
-  const [selectedPassword, setSelectedPassword] = useState<PasswordEntry>({} as PasswordEntry);
-
+  const [selectedPassword, setSelectedPassword] = useState<PasswordEntry>(
+    {} as PasswordEntry
+  );
 
   // Add new state after other states
   const [showBiometricAuth, setShowBiometricAuth] = useState(false);
   const [bioAuthResponse, setBioAuthResponse] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  
-
   const showError = (message: string) => {
     setError(message);
     setTimeout(() => setError(null), 3000); // Auto dismiss after 3s
   };
-  console.log(userId)
+  console.log(userId);
 
   // Fetch vault data when authenticated
   useEffect(() => {
@@ -135,13 +136,14 @@ const Home: FC = () => {
   };
 
   const handleAuthBeforeFill = async (password: PasswordEntry) => {
-     if (!bioAuthResponse){
+    if (!bioAuthResponse) {
       console.log("Initiating auth before fill for:", password.site);
-
+      setSelectedPassword(password);
       setShowBiometricAuth(true);
-     } else {
+    } else {
+      console.log("Auth response received. Proceeding with fill.", password);
       handleFillPassword(password);
-     }
+    }
   };
 
   const handlePasswordOptionChange = (key: keyof PasswordOptions) => {
@@ -171,37 +173,42 @@ const Home: FC = () => {
 
   const handleBiometricSuccess = async (data: { blob: Blob; type: string }) => {
     setBioAuthResponse(false);
-    console.log("Biometric data captured:", data);
-    // Add the biometric data to the state
     const formData = new FormData();
     formData.append("biometricData", data.blob);
     formData.append("type", data.type);
+    
 
     const response = await matchBiometricData(formData);
-    
-    //assume response will be true or false... 
+
+    console.log("DEBUG: Match biodfsdfsdfdmetric response:", response);
+
+    if (!response.verified) {
+      showError("Biometric authentication failed"); // Show error when verification fails
+    }
+
     setBioAuthResponse(response.verified);
-    if (bioAuthResponse) {
-      // Proceed with filling password after successful authentication
+
+    if (response.verified) {
       handleFillPassword(selectedPassword);
+    } else {
+      setError("Biometric authentication failed"); // Show error message
     }
 
     setShowBiometricAuth(false);
-    
   };
 
 
   const handleBiometricFailure = (error: string) => {
     console.error("Biometric auth failed:", error);
-    showError("Biometric authentication failed");
-    
+    setError("Biometric authentication failed"); // Show error message
     setShowBiometricAuth(false);
     setBioAuthResponse(false);
-  }
+  };
 
   if (!isAuthenticated) {
     return (
       <div className="w-[300px] max-height-[400px] bg-gradient-to-br from-slate-50 to-white p-2 relative overflow-hidden rounded-xl">
+
         <div className="relative backdrop-blur-sm bg-white/70 rounded-xl p-4 shadow-xl border border-white/50">
           <div className="text-center space-y-3">
             <div className="flex items-center justify-center gap-2 text-purple-800 mb-4">
@@ -232,24 +239,31 @@ const Home: FC = () => {
   }
 
   // Add JSX before the main return - after the authentication check
-  {
-    error && (
-      <div className="absolute top-2 left-2 right-2 z-50 animate-slideDown">
-        <div className="bg-red-50 border-l-4 border-red-500 p-3 rounded-r shadow-lg">
-          <div className="flex items-center gap-2">
-            <svg className="w-5 h-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-            </svg>
-            <p className="text-sm text-red-700">{error}</p>
-          </div>
-        </div>
-      </div>
-    )
-  }
 
   return (
     <div className="w-[300px]  max-height-[400px] bg-gradient-to-br from-slate-50 to-white p-2 relative overflow-hidden rounded-xl">
       {/* Animated Background Shapes */}
+
+      {error && (
+          <div className="absolute top-2 left-2 right-2 z-50 animate-slideDown">
+            <div className="bg-red-50 border-l-4 border-red-500 p-3 rounded-r shadow-lg">
+              <div className="flex items-center gap-2">
+                <svg
+                  className="w-5 h-5 text-red-500"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                <p className="text-sm text-red-700">{error}</p>
+              </div>
+            </div>
+          </div>
+        )}
 
       {/* Glass Container */}
       <div className="relative backdrop-blur-sm bg-white/70 rounded-xl p-4 shadow-xl border border-white/50">
@@ -315,9 +329,11 @@ const Home: FC = () => {
                   Saved Passwords
                 </div>
                 {/* Update the passwords list container div */}
-                <div className="space-y-2 max-h-[120px] overflow-y-auto pr-2 scrollbar-thin scrollbar-track-slate-100 scrollbar-thumb-purple-200 
+                <div
+                  className="space-y-2 max-h-[120px] overflow-y-auto pr-2 scrollbar-thin scrollbar-track-slate-100 scrollbar-thumb-purple-200 
                 hover:scrollbar-thumb-purple-300 rounded-lg p-2 shadow-inner 
-                bg-purple-50/30 backdrop-blur-sm">
+                bg-purple-50/30 backdrop-blur-sm"
+                >
                   {filteredPasswords.length > 0 ? (
                     filteredPasswords.map((password) => (
                       <div
@@ -336,8 +352,10 @@ const Home: FC = () => {
                           className="flex-1 min-w-0 cursor-pointer"
                           onClick={() => openSite(password.site)}
                         >
-                          <div className="font-medium text-slate-800 truncate 
-            hover:text-purple-600 transition-colors text-sm">
+                          <div
+                            className="font-medium text-slate-800 truncate 
+            hover:text-purple-600 transition-colors text-sm"
+                          >
                             {new URL(password.site).hostname}
                           </div>
                           <div className="text-xs text-slate-500 truncate">
@@ -352,22 +370,32 @@ const Home: FC = () => {
                             title="Copy password"
                           >
                             <img
-                              src={`/icons/${copiedId === password._id ? "check" : "copy"}.svg`}
+                              src={`/icons/${
+                                copiedId === password._id ? "check" : "copy"
+                              }.svg`}
                               alt="Copy"
                               className="w-3.5 h-3.5 opacity-70 group-hover:opacity-100"
                             />
                             {copiedId === password._id && (
-                              <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 
+                              <span
+                                className="absolute -top-8 left-1/2 transform -translate-x-1/2 
                 bg-gray-800 text-white text-xs py-1 px-2 rounded-lg shadow-lg 
-                whitespace-nowrap">
+                whitespace-nowrap"
+                              >
                                 Copied!
                               </span>
                             )}
                           </button>
                           <button
                             onClick={() => handleAuthBeforeFill(password)}
-                            className="px-2 py-1 rounded-lg bg-purple-600 hover:bg-purple-700 
-    transition-all duration-300 flex items-center gap-1 group"
+                            className={`px-2 py-1 rounded-lg transition-all duration-300 flex items-center gap-1 group
+                            ${
+                              bioAuthResponse
+                                ? "bg-green-600 hover:bg-green-700" // Success state
+                                : error
+                                ? "bg-red-600 hover:bg-red-700" // Error state
+                                : "bg-purple-600 hover:bg-purple-700" // Default state
+                            }`}
                             title="Authenticate & Fill"
                           >
                             <img
@@ -375,7 +403,6 @@ const Home: FC = () => {
                               alt="Authenticate"
                               className="w-3.5 h-3.5 text-white"
                             />
-                            {/* <span className="text-xs text-white font-medium">Fill</span> */}
                           </button>
                         </div>
                       </div>
@@ -389,9 +416,6 @@ const Home: FC = () => {
               </div>
             </div>
           </div>
-
-
-
         )}
 
         {/* Biometric Auth */}
@@ -400,6 +424,7 @@ const Home: FC = () => {
           setShowBiometricAuth={setShowBiometricAuth}
           onSuccess={handleBiometricSuccess}
           onError={handleBiometricFailure}
+          bioAuthendicated={bioAuthResponse}
         />
 
         {/* Generate Password Button */}
@@ -426,7 +451,8 @@ const Home: FC = () => {
                 Import from Google
               </span>
             </button>
-          </div>)}
+          </div>
+        )}
       </div>
     </div>
   );
