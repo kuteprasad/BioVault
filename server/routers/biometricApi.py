@@ -33,6 +33,9 @@ class Voice(BaseModel):
     voice1_path :str
     voice2_path :str
 
+class FaceDetect(BaseModel):
+    imageUrl :str
+
 
 @router.post('/biometric/photo')
 async def verify_faces(data: Photo):
@@ -145,6 +148,24 @@ async def verify_voices(data: Voice):
                     logging.error(f"Failed to clean up {path}: {str(e)}")
 
 
+@router.post('/biometric/face-detect')
+async def detect_faces(data: FaceDetect):
+    
+    try:
+        verification = DeepFace.verify(
+            img1_path=data.imageUrl,
+            img2_path="",
+            model_name="VGG-Face",
+            detector_backend="opencv"
+        )
+        logging.info(f"Verification complete: {verification}")
+        
+        return {"verified": verification["verified"]}
+        
+    except Exception as e:
+        logging.error(f"Verification failed: {str(e)}")
+        return {"verified": False}
+
 
 def transcribe_audio(filepath, api_key):
 
@@ -172,7 +193,7 @@ def transcribe_audio(filepath, api_key):
     except Exception as e:
         print(f"Transcription error: {e}")
         return None
-    
+
 
 def verify_speaker(response):
     """Simple speaker verification check"""
