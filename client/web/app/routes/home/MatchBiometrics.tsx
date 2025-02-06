@@ -8,12 +8,11 @@ import { matchBiometricData } from '~/services/authService';
 
 type BiometricType = 'fingerprint' | 'photo' | 'voice';
 
-
 const MatchBiometrics = () => {
   const navigate = useNavigate();
   const [activePanel, setActivePanel] = useState<BiometricType | null>(null);
   const [loading, setLoading] = useState(false);
-  const [matchResults, setMatchResults] = useState(false);
+  const [matchResults, setMatchResults] = useState<{ [key in BiometricType]?: boolean }>({});
 
   const handlePanelClick = (panel: BiometricType) => {
     setActivePanel(activePanel === panel ? null : panel);
@@ -28,10 +27,9 @@ const MatchBiometrics = () => {
 
       // API call to match biometric
       const response = await matchBiometricData(formData);
-      
 
-      setMatchResults(response.data.verified);
-      
+      setMatchResults((prev) => ({ ...prev, [data.type]: response.data.verified }));
+
       if (response.data.verified) {
         toast.success(`${data.type} matched successfully!`);
       } else {
@@ -51,19 +49,16 @@ const MatchBiometrics = () => {
   };
 
   const getMatchStatus = (type: BiometricType) => {
-    
- 
+    const result = matchResults[type];
+    if (result === undefined) return null;
 
     return (
-      <div className={`flex items-center gap-2 ${
-        matchResults ? 'text-green-600' : 'text-red-600'
-      }`}>
-        {matchResults ? (
+      <div className={`flex items-center gap-2 ${result ? 'text-green-600' : 'text-red-600'}`}>
+        {result ? (
           <CheckCircle className="h-5 w-5" />
         ) : (
           <XCircle className="h-5 w-5" />
         )}
-        
       </div>
     );
   };
@@ -87,7 +82,7 @@ const MatchBiometrics = () => {
                   `${type.charAt(0).toUpperCase()}${type.slice(1)} Authentication`}
               </span>
 
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
                 {getMatchStatus(type as BiometricType)}
                 {activePanel === type ? (
                   <ChevronUpIcon className="h-5 w-5" />
