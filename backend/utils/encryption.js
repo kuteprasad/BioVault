@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 // Convert the key to correct length (32 bytes for AES-256)
-const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || crypto.randomBytes(32).toString('hex');
+const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY
 const KEY_BUFFER = Buffer.from(ENCRYPTION_KEY).slice(0, 32); // Ensure key is exactly 32 bytes
 const IV_LENGTH = 16; // For AES, this is always 16
 

@@ -29,7 +29,7 @@ export const addPassword = async (req, res) => {
 
     if (existingPassword) {
       // Update the existing password
-      existingPassword.passwordEncrypted = encryptionService.encrypt(passwordEncrypted, vault.encryption_key);
+      existingPassword.passwordEncrypted = encryptionService.encrypt(passwordEncrypted);
       existingPassword.notes = notes || existingPassword.notes;
       existingPassword.updatedAt = new Date();
       console.log('Password updated successfully');
@@ -38,7 +38,7 @@ export const addPassword = async (req, res) => {
       const newPassword = {
         site,
         username,
-        passwordEncrypted: encryptionService.encrypt(passwordEncrypted, vault.encryption_key),
+        passwordEncrypted: encryptionService.encrypt(passwordEncrypted),
         notes,
         createdAt: new Date(),
         updatedAt: new Date()
@@ -154,7 +154,7 @@ export const getVault = async (req, res) => {
           return {
             ...p.toObject(),
             passwordEncrypted: isEncrypted 
-              ? encryptionService.decrypt(p.passwordEncrypted, vault.encryption_key)
+              ? encryptionService.decrypt(p.passwordEncrypted)
               : p.passwordEncrypted // Return as-is if not encrypted
           };
         } catch (error) {
