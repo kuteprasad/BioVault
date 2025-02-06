@@ -108,8 +108,8 @@ export default function UpdateProfile() {
 
   const handleLogout = () => {
     dispatch(logout());
-    // navigate('/login');
     toast.success('Logged out successfully');
+    navigate('/');
   };
 
   return (

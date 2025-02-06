@@ -76,7 +76,7 @@ const Sidebar: React.FC = () => {
   const navItems = [
     { path: "/", icon: <ShieldCheck className="h-6 w-6" />, label: "My Vault" },
     { path: "/settings", icon: <Settings className="h-6 w-6" />, label: "Settings" },
-    { path: "/import-passwords", icon: <Lock className="h-6 w-6" />, label: "Passwords" },
+    { path: "/import-passwords", icon: <Lock className="h-6 w-6" />, label: "Import Passwords" },
     { path: "/match-biometrics", icon: <FilePlus className="h-6 w-6" />, label: "Match Biometrics" },
     { path: "/subscription", icon: <Crown className="h-6 w-6" />, label: "Subscription" },
   ];
@@ -92,6 +92,7 @@ const Sidebar: React.FC = () => {
     try {
       // Perform logout logic here
       dispatch(logout());
+      navigate("/");
     } catch (error) {
       console.error('Logout error:', error);
       // Show error toast or message
