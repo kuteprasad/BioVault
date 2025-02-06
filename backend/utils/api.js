@@ -3,8 +3,8 @@ import axios from 'axios';
 export const comparePhotoFastApi = async (storedUrl, preparedUrl) => {
     try {
         const response = await axios.post(`${process.env.FASTAPI_URL}/api/biometric/photo`, {
-            storedUrl,
-            preparedUrl
+            img1_path: storedUrl,
+            img2_path: preparedUrl
         },
         {
             headers: {
