@@ -1,5 +1,4 @@
 import User from '../models/User.js';
-
 import jwt from 'jsonwebtoken';
 import { sendEmail } from '../utils/sendEmail.js';
 import dotenv from 'dotenv';
@@ -82,13 +81,13 @@ const login = async (req, res) => {
     const token = jwt.sign(
       { userId: user._id },
       process.env.SECRET_KEY,
-      { expiresIn: '1h' } // Set to 1 hour
+      { expiresIn: process.env.ACCESS_TOKEN_EXPIRY }
     );
 
     const refreshToken = jwt.sign(
       { userId: user._id },
       process.env.REFRESH_SECRET_KEY || process.env.SECRET_KEY,
-      { expiresIn: '7d' } // Set to 7 days
+      { expiresIn: process.env.REFRESH_TOKEN_EXPIRY }
     );
 
     // Include user data and both tokens in response
@@ -142,7 +141,7 @@ const refreshAccessToken = async (req, res) => {
     const newToken = jwt.sign(
       { userId: decoded.userId },
       process.env.SECRET_KEY,
-      { expiresIn: '1h' }
+      { expiresIn: process.env.ACCESS_TOKEN_EXPIRY }
     );
 
     res.json({ token: newToken });

@@ -1,6 +1,9 @@
 import { Provider } from 'react-redux';
 import store from './redux/store';
 import { Toaster } from 'sonner';
+import { getToken } from './utils/authUtils';
+import { logout } from './redux/authSlice';
+import { useEffect } from 'react';
 
 
 import {
@@ -50,20 +53,31 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
+function AppWithAuth() {
+  useEffect(() => {
+  const token = getToken();
+    if (!token) {
+      store.dispatch(logout());
+    }
+  }, []);
+
+  return (
+    <>
+      <Toaster 
+        position="top-right" 
+        expand={false} 
+        richColors 
+        closeButton
+      />
+      <Outlet />
+    </>
+  );
+}
+
 export default function App() {
   return (
     <Provider store={store}>
-   
-     
-      <Toaster 
-          position="top-right" 
-          expand={false} 
-          richColors 
-          closeButton
-        />
-        <Outlet />
-     
-     
+      <AppWithAuth />
     </Provider>
   );
 }
