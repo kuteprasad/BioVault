@@ -5,9 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "concurrently \"npm run backend\" \"npm run client\"",
+    "dev": "concurrently \"npm run backend\" \"npm run client\" \"npm run extension\"",
     "server": "cd server && uvicorn main:app --reload",
     "backend": "cd backend && nodemon index.js",
+    "extension": "cd client && cd chrome-extension && npm run dev ",
     "client": "cd client/web && npm run dev",
     "install-server": "cd server && pip install -r requirements.txt",
     "install-client": "cd client && npm install",
