@@ -7,16 +7,13 @@ import axios from 'axios';
 import { matchBiometricData } from '~/services/authService';
 
 type BiometricType = 'fingerprint' | 'photo' | 'voice';
-interface MatchResult {
-  percentage: number;
-  matched: boolean;
-}
+
 
 const MatchBiometrics = () => {
   const navigate = useNavigate();
   const [activePanel, setActivePanel] = useState<BiometricType | null>(null);
   const [loading, setLoading] = useState(false);
-  const [matchResults, setMatchResults] = useState<{ [key in BiometricType]?: MatchResult }>({});
+  const [matchResults, setMatchResults] = useState(false);
 
   const handlePanelClick = (panel: BiometricType) => {
     setActivePanel(activePanel === panel ? null : panel);
@@ -31,18 +28,14 @@ const MatchBiometrics = () => {
 
       // API call to match biometric
       const response = await matchBiometricData(formData);
-
-      const matchResult: MatchResult = {
-        percentage: response.data.matchPercentage,
-        matched: response.data.matchPercentage >= 80 // Threshold for match
-      };
-
-      setMatchResults(prev => ({ ...prev, [data.type]: matchResult }));
       
-      if (matchResult.matched) {
-        toast.success(`${data.type} matched successfully! (${matchResult.percentage}% match)`);
+
+      setMatchResults(response.data.verified);
+      
+      if (response.data.verified) {
+        toast.success(`${data.type} matched successfully!`);
       } else {
-        toast.error(`${data.type} did not match. (${matchResult.percentage}% match)`);
+        toast.error(`${data.type} did not match.`);
       }
     } catch (error: any) {
       console.error('Error matching biometric:', error);
@@ -58,19 +51,19 @@ const MatchBiometrics = () => {
   };
 
   const getMatchStatus = (type: BiometricType) => {
-    const result = matchResults[type];
-    if (!result) return null;
+    
+ 
 
     return (
       <div className={`flex items-center gap-2 ${
-        result.matched ? 'text-green-600' : 'text-red-600'
+        matchResults ? 'text-green-600' : 'text-red-600'
       }`}>
-        {result.matched ? (
+        {matchResults ? (
           <CheckCircle className="h-5 w-5" />
         ) : (
           <XCircle className="h-5 w-5" />
         )}
-        <span>{result.percentage}% match</span>
+        
       </div>
     );
   };

@@ -122,22 +122,7 @@ const saveBiometricData = async (req, res) => {
 
 
 
-const convertToImage = async (data, isUrl = false) => {
-    return new Promise((resolve, reject) => {
-        const img = new Image();
-        
-        img.onerror = reject;
-        img.onload = () => resolve(img);
-        
-        if (isUrl) {
-            img.src = data;
-        } else {
-            // Convert buffer to base64
-            const base64 = Buffer.from(data).toString('base64');
-            img.src = `data:image/jpeg;base64,${base64}`;
-        }
-    });
-};
+
 
 const getBiometricData = async (userId, type) => {
 
@@ -181,7 +166,7 @@ const matchBiometricData = async (req, res) => {
         const storedBiometric = await getBiometricData(userId, type);
         console.log("Retrieved stored biometric data:", storedBiometric);
 
-        let matchPercentage;
+        let verified;
 
         if (type == 'photo') {
             const storedFileUrl = storedBiometric.cloudinaryUrl;
@@ -192,29 +177,28 @@ const matchBiometricData = async (req, res) => {
             const preparedFileUrl = (await handlePhotoUpload(file)).face.cloudinaryUrl;
             // console.log("Prepared file for matching:", preparedFile);
 
-            matchPercentage = await calculateMatch(storedFileUrl, preparedFileUrl, type);
+            verified = await calculateMatch(storedFileUrl, preparedFileUrl, type);
         }
         else if (type === 'voice') {
             // Compare voice data
             const storedFileUrl = storedBiometric.cloudinaryUrl;
+            
         
             // Prepare file for matching
-            const preparedFileUrl = (await handleVoiceUpload(file)).face.cloudinaryUrl;
+            const preparedFileUrl = (await handleVoiceUpload(file)).voice.cloudinaryUrl;
             // console.log("Prepared file for matching:", preparedFile);
 
-            matchPercentage = await calculateMatch(storedFileUrl, preparedFileUrl, type);
+            verified = await calculateMatch(storedFileUrl, preparedFileUrl, type);
         } else if (type === 'fingerprint') {
             // Compare fingerprint data
             const storedBuffer = convertPublicKeyToBuffer(storedBiometric.publicKey);
 
-            matchPercentage = await calculateMatch(storedBuffer, file.buffer, type);
+            verified = await calculateMatch(storedBuffer, file.buffer, type);
         }
 
-        console.log("Calculated match percentage:", matchPercentage);
 
         res.status(200).json({
-            matchPercentage,
-            matched: matchPercentage >= 80
+            verified
         });
 
     } catch (error) {
