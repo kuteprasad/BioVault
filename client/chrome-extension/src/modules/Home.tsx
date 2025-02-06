@@ -189,7 +189,7 @@ const Home: FC = () => {
     const response = await matchBiometricData(formData);
     console.log("Biometric match response:", response);
     //assume response will be true or false... 
-    setBioAuthResponse(response);
+    setBioAuthResponse(response.verified);
 
     setShowBiometricAuth(false);
     

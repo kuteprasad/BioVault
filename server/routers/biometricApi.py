@@ -52,7 +52,7 @@ async def verify_faces(data: Photo):
         
     except Exception as e:
         logging.error(f"Verification failed: {str(e)}")
-        raise HTTPException(status_code=400, detail=f"Verification failed: {str(e)}")
+        return {"verified": False}
         
     finally:
         # Cleanup with logging

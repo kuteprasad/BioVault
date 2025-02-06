@@ -3,8 +3,8 @@ import axios from 'axios';
 export const comparePhotoFastApi = async (storedUrl, preparedUrl) => {
     try {
         const response = await axios.post(`${process.env.FASTAPI_URL}/api/biometric/photo`, {
-            storedUrl,
-            preparedUrl
+            img1_path: storedUrl,
+            img2_path: preparedUrl
         },
         {
             headers: {
@@ -21,15 +21,18 @@ export const comparePhotoFastApi = async (storedUrl, preparedUrl) => {
 
 export const compareVoiceFastApi = async (storedUrl, preparedUrl) => {
     try {
+        console.log(storedUrl)
         const response = await axios.post(`${process.env.FASTAPI_URL}/api/biometric/voice`, {
-            storedUrl,
-            preparedUrl
+            voice1_path: storedUrl,
+            voice2_path: preparedUrl
         },
         {
             headers: {
                 'Content-Type': 'application/json'
             }
         });
+
+        console.log("asdfghj    kjahsdkjah kajdhskajs",response.data)
 
         return response.data;
     } catch (error) {

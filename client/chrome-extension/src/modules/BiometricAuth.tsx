@@ -24,8 +24,6 @@ export const BiometricAuth: FC<BiometricAuthProps> = ({
     // setCapturedData(null);
   };
 
-
-
   return (
     <>
       {showBiometricAuth && (
