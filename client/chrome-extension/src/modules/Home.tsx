@@ -195,6 +195,7 @@ const Home: FC = () => {
     
   };
 
+
   const handleBiometricFailure = (error: string) => {
     console.error("Biometric auth failed:", error);
     showError("Biometric authentication failed");
