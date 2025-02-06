@@ -24,7 +24,7 @@ const plans = [
     price: '$4.99',
     period: 'per month',
     icon: <Star className="h-8 w-8 text-yellow-500" />,
-    image: 'https://images.unsplash.com/photo-1614064641938-3bbee52942c7?w=800&auto=format&fit=crop&q=60&fit=crop&w=800&h=400',
+    image: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&auto=format&fit=crop&q=60&fit=crop&w=800&h=400', // Updated image URL
     features: [
       'Unlimited passwords',
       'Advanced encryption',
@@ -96,6 +96,16 @@ const features = [
   }
 ];
 
+const floatingAnimation = {
+  y: [0, -10, 0],
+  transition: {
+    duration: 3,
+    repeat: Infinity,
+    repeatType: 'loop',
+    ease: 'easeInOut',
+  },
+};
+
 export default function SubscriptionPage() {
   const [hoveredPlan, setHoveredPlan] = useState<string | null>(null);
 
@@ -105,10 +115,26 @@ export default function SubscriptionPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-white py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-white py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      {/* Background Animation */}
+      <motion.div
+        className="absolute top-0 left-0 w-64 h-64 bg-purple-300 rounded-full opacity-50"
+        animate={floatingAnimation}
+      />
+      <motion.div
+        className="absolute top-0 right-0 w-64 h-64 bg-purple-400 rounded-full opacity-50"
+        animate={floatingAnimation}
+        style={{ animationDelay: '1s' }}
+      />
+      <motion.div
+        className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500 rounded-full opacity-50"
+        animate={floatingAnimation}
+        style={{ animationDelay: '2s' }}
+      />
+
       {/* Hero Section */}
       <motion.div 
-        className="text-center mb-16"
+        className="text-center mb-16 relative z-10"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
@@ -123,7 +149,7 @@ export default function SubscriptionPage() {
       </motion.div>
 
       {/* Pricing Cards */}
-      <div className="max-w-7xl mx-auto grid gap-8 lg:grid-cols-3 lg:gap-8 mb-24">
+      <div className="max-w-7xl mx-auto grid gap-8 lg:grid-cols-3 lg:gap-8 mb-24 relative z-10">
         {plans.map((plan, index) => (
           <motion.div
             key={plan.name}
@@ -170,7 +196,7 @@ export default function SubscriptionPage() {
 
       {/* Features Grid */}
       <motion.div 
-        className="mt-24 max-w-6xl mx-auto"
+        className="mt-24 max-w-6xl mx-auto relative z-10"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.5 }}
@@ -203,7 +229,7 @@ export default function SubscriptionPage() {
 
       {/* Call to Action */}
       <motion.div 
-        className="text-center mt-24"
+        className="text-center mt-24 relative z-10"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.8 }}

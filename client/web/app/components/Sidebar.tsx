@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import type{ AppDispatch, RootState } from "../redux/store";
-import { fetchProfile } from "~/redux/authSlice";
+import { fetchProfile, logout } from "../redux/authSlice";
 import {
   ShieldCheck,
   User,
@@ -16,6 +16,9 @@ import {
   Loader,
   LogOut,
   Crown,
+  Home,
+  Key,
+  CreditCard,
 } from "lucide-react";
 
 const ProfileSection: React.FC<{ isOpen: boolean }> = ({ isOpen }) => {
@@ -68,6 +71,9 @@ const ProfileSection: React.FC<{ isOpen: boolean }> = ({ isOpen }) => {
 
 const Sidebar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(true);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const [isLoading, setIsLoading] = useState(false);
 
   const navItems = [
     { path: "/", icon: <ShieldCheck className="h-6 w-6" />, label: "My Vault" },
@@ -83,6 +89,26 @@ const Sidebar: React.FC = () => {
     transition-colors duration-200`;
   };
 
+  const handleLogout = async () => {
+    setIsLoading(true);
+    try {
+      // Perform logout logic here
+       // Delete the JWT token from localStorage
+       localStorage.removeItem('jwtToken');
+
+      // Navigate to /home1 and show loading indicator
+      navigate('/home1', { replace: true });
+
+      // Optional: Reload the page to clear all states
+      window.location.reload();
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Show error toast or message
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="relative">
       {/* Mobile Sidebar Toggle */}
@@ -96,6 +122,13 @@ const Sidebar: React.FC = () => {
           <Menu className="h-6 w-6 text-purple-800" />
         )}
       </button>
+
+      {/* Loading Indicator */}
+      {isLoading && (
+        <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-75 z-50">
+          <div className="loader">Loading...</div>
+        </div>
+      )}
 
       {/* Expand/Collapse Button */}
       <button
@@ -136,6 +169,29 @@ const Sidebar: React.FC = () => {
             )}
           </NavLink>
         ))}
+
+        {/* Logout button at bottom */}
+        <div className="p-4 border-t border-gray-200">
+          <button
+            onClick={handleLogout}
+            disabled={isLoading}
+            className="flex items-center gap-3 w-full px-3 py-2 text-gray-700 
+                     rounded-lg hover:bg-red-50 hover:text-red-600 
+                     transition-all duration-200 group disabled:opacity-50"
+          >
+            {isLoading ? (
+              <>
+                <Loader className="h-5 w-5 animate-spin" />
+                <span>Logging out...</span>
+              </>
+            ) : (
+              <>
+                <LogOut className="h-5 w-5 group-hover:rotate-180 transition-transform duration-300" />
+                <span>Logout</span>
+              </>
+            )}
+          </button>
+        </div>
       </nav>
     </div>
   );
