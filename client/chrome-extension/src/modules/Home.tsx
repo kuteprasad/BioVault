@@ -94,7 +94,7 @@ const Home: FC = () => {
   const handleAuthClick = () => {
     if (!isAuthenticated) {
       // Open main website in new tab
-      chrome.tabs.create({ url: "http://localhost:5173" });
+      chrome.tabs.create({ url: "https://5zngffqh-5173.inc1.devtunnels.ms" });
     }
   };
 
