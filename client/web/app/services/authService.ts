@@ -51,7 +51,7 @@ export const saveBiometricData = async (formData: FormData) => {
     const token = getToken();
 
     console.log("reached save bio data");
-    const response = await axios.post(`http://localhost:3000/auth/biometrics/${formData.get('type')}`, formData, 
+    const response = await axios.post(`https://5zngffqh-3000.inc1.devtunnels.ms/auth/biometrics/${formData.get('type')}`, formData, 
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -73,7 +73,7 @@ export const matchBiometricData = async (formData: FormData) => {
     const token = getToken();
 
     console.log("reached match bio data");
-    const response = await axios.post(`http://localhost:3000/auth/biometrics/${formData.get('type')}/match`, formData, 
+    const response = await axios.post(`https://5zngffqh-3000.inc1.devtunnels.ms/auth/biometrics/${formData.get('type')}/match`, formData, 
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -93,7 +93,7 @@ export const isFaceDetected = async (formData: FormData) => {
   try {
     const token = getToken();
     console.log("reached match bio data",formData.get('biometricData'));
-    const response = await axios.post(`http://localhost:3000/auth/biometrics/${formData.get('type')}/is-face-detected`, formData, 
+    const response = await axios.post(`https://5zngffqh-3000.inc1.devtunnels.ms/auth/biometrics/${formData.get('type')}/is-face-detected`, formData, 
       {
         headers: {
           Authorization: `Bearer ${token}`,

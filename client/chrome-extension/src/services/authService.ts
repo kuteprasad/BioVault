@@ -7,7 +7,7 @@ export const matchBiometricData = async (formData: FormData) => {
       const token = await getExtensionToken();
   
       console.log("reached match bio data");
-      const response = await axios.post(`http://localhost:3000/auth/biometrics/${formData.get('type')}/match`, formData, 
+      const response = await axios.post(`https://5zngffqh-3000.inc1.devtunnels.ms/auth/biometrics/${formData.get('type')}/match`, formData, 
         {
           headers: {
             Authorization: `Bearer ${token}`,

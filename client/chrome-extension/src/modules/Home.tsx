@@ -99,13 +99,13 @@ const Home: FC = () => {
   };
 
   const handleSettingsClick = () => {
-    chrome.tabs.create({ url: "http://localhost:5173/settings" });
+    chrome.tabs.create({ url: "https://5zngffqh-5173.inc1.devtunnels.ms/settings" });
   };
   const handleHomeClick = () => {
-    chrome.tabs.create({ url: "http://localhost:5173/" });
+    chrome.tabs.create({ url: "https://5zngffqh-5173.inc1.devtunnels.ms/" });
   };
   const handelImportPassClick = () => {
-    chrome.tabs.create({ url: "http://localhost:5173/import-passwords" });
+    chrome.tabs.create({ url: "https://5zngffqh-5173.inc1.devtunnels.ms/import-passwords" });
   };
 
   const openSite = (url: string) => {

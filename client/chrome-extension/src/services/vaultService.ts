@@ -12,7 +12,7 @@ export const getVault = async (): Promise<VaultResponse> => {
 
     console.log('Fetching vault with token:', token);
 
-    const response = await fetch('http://localhost:3000/password/vault', {
+    const response = await fetch('https://5zngffqh-3000.inc1.devtunnels.ms/password/vault', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
