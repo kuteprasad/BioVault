@@ -1,5 +1,4 @@
 from fastapi import APIRouter, HTTPException
-from deepface import DeepFace
 from pydantic import BaseModel
 import os
 import json
@@ -11,7 +10,7 @@ import asyncio
 import subprocess
 from pathlib import Path
 import logging
-import wespeaker
+import face_recognition  # New import
 import soundfile as sf
 import torchaudio
 from pyannote.audio import Pipeline
@@ -31,14 +30,7 @@ class Voice(BaseModel):
 class FaceDetect(BaseModel):
     imageUrl: str
 
-# Initialize WeSpeaker model
-try:
-    voice_model = wespeaker.load_model('chinese')
-    # Set CPU as default device - change to cuda:0 if GPU available
-    voice_model.set_device('cpu')
-except Exception as e:
-    logging.error(f"Failed to load WeSpeaker model: {str(e)}")
-    voice_model = None
+# Remove WeSpeaker initialization if not needed for other functions
 
 @router.post('/biometric/photo')
 async def verify_faces(data: Photo):
@@ -46,45 +38,133 @@ async def verify_faces(data: Photo):
     img2_path = None
     
     try:
-        verification = DeepFace.verify(
-            img1_path=data.img1_path,
-            img2_path=data.img2_path,
-            model_name="VGG-Face",
-            detector_backend="opencv"
-        )
-        logging.info(f"Verification complete: {verification}")
+        # Download images if they are URLs
+        if data.img1_path.startswith('http'):
+            img1_path = os.path.join('temp', f'img1_{datetime.now().strftime("%Y%m%d_%H%M%S")}.jpg')
+            os.makedirs(os.path.dirname(img1_path), exist_ok=True)
+            async with aiohttp.ClientSession() as session:
+                async with session.get(data.img1_path) as resp:
+                    with open(img1_path, 'wb') as f:
+                        f.write(await resp.read())
+        else:
+            img1_path = data.img1_path
+            
+        if data.img2_path.startswith('http'):
+            img2_path = os.path.join('temp', f'img2_{datetime.now().strftime("%Y%m%d_%H%M%S")}.jpg')
+            os.makedirs(os.path.dirname(img2_path), exist_ok=True)
+            async with aiohttp.ClientSession() as session:
+                async with session.get(data.img2_path) as resp:
+                    with open(img2_path, 'wb') as f:
+                        f.write(await resp.read())
+        else:
+            img2_path = data.img2_path
         
-        return {"verified": verification["verified"]}
+        # Load the images
+        known_image = face_recognition.load_image_file(img1_path)
+        unknown_image = face_recognition.load_image_file(img2_path)
+        
+        # Get face encodings
+        try:
+            known_face_encodings = face_recognition.face_encodings(known_image)
+            unknown_face_encodings = face_recognition.face_encodings(unknown_image)
+            
+            if not known_face_encodings or not unknown_face_encodings:
+                logging.error("No faces found in one or both images")
+                return {"verified": False, "error": "No faces found in one or both images"}
+            
+            # Compare faces
+            results = face_recognition.compare_faces(
+                [known_face_encodings[0]], 
+                unknown_face_encodings[0]
+            )
+            
+            # Get face distance - lower means more similar
+            face_distances = face_recognition.face_distance(
+                [known_face_encodings[0]], 
+                unknown_face_encodings[0]
+            )
+            
+            logging.info(f"Face verification result: {results[0]}, distance: {face_distances[0]}")
+            
+            return {
+                "verified": bool(results[0]), 
+                "confidence": float(1 - face_distances[0])
+            }
+            
+        except IndexError:
+            logging.error("No faces found in one or both images")
+            return {"verified": False, "error": "No faces found in one or both images"}
         
     except Exception as e:
         logging.error(f"Verification failed: {str(e)}")
-        return {"verified": False}
+        return {"verified": False, "error": str(e)}
         
     finally:
         # Cleanup with logging
-        if img1_path:
-            success = True
-            logging.info(f"Cleanup of image 1 {'successful' if success else 'failed'}")
-        if img2_path:
-            success = True
-            logging.info(f"Cleanup of image 2 {'successful' if success else 'failed'}")
+        for path, label in [(img1_path, 'image 1'), (img2_path, 'image 2')]:
+            if path and path.startswith('temp') and os.path.exists(path):
+                try:
+                    os.remove(path)
+                    logging.info(f"Cleanup of {label} successful")
+                except Exception as e:
+                    logging.error(f"Cleanup of {label} failed: {str(e)}")
 
 
 @router.post('/biometric/face-detect')
 async def detect_faces(data: FaceDetect):
+    img_path = None
+    
     try:
-        verification = DeepFace.verify(
-            img1_path=data.imageUrl,
-            img2_path="https://res.cloudinary.com/ddonrwnen/image/upload/v1738813859/biometrics/face/k22q4o8myqgxd6nznojm.jpg",
-            model_name="VGG-Face",
-            detector_backend="opencv"
-        )
-        logging.info(f"Verification complete: {verification}")
+        # Download image if it's a URL
+        if data.imageUrl.startswith('http'):
+            img_path = os.path.join('temp', f'face_detect_{datetime.now().strftime("%Y%m%d_%H%M%S")}.jpg')
+            os.makedirs(os.path.dirname(img_path), exist_ok=True)
+            async with aiohttp.ClientSession() as session:
+                async with session.get(data.imageUrl) as resp:
+                    with open(img_path, 'wb') as f:
+                        f.write(await resp.read())
+        else:
+            img_path = data.imageUrl
         
-        return {"verified": True}
+        # Load the image
+        image = face_recognition.load_image_file(img_path)
         
+        # Detect faces in the image
+        face_locations = face_recognition.face_locations(image)
+
+        # Log the results
+        face_count = len(face_locations)
+        print(f"Face detection found {face_count} faces in the image")
+        
+        if face_count > 0:
+            # Return success with face count and locations
+            return {
+                "verified": True,
+                "face_count": face_count,
+            }
+        else:
+            # No faces found
+            return {
+                "verified": False,
+                "face_count": 0,
+                "error": "No faces detected in the image"
+            }
+            
     except Exception as e:
-        return {"verified": False}
+        logging.error(f"Face detection failed: {str(e)}")
+        return {
+            "detected": False,
+            "error": str(e)
+        }
+        
+    finally:
+        # Cleanup temp file
+        if img_path and img_path.startswith('temp') and os.path.exists(img_path):
+            try:
+                os.remove(img_path)
+                logging.info("Cleanup of image successful")
+            except Exception as e:
+                logging.error(f"Cleanup of image failed: {str(e)}")
 
 TEMP_DIR = "temp"
 
