@@ -38,6 +38,7 @@ async def verify_faces(data: Photo):
     img2_path = None
     
     try:
+        print("data : ",data)
         # Download images if they are URLs
         if data.img1_path.startswith('http'):
             img1_path = os.path.join('temp', f'img1_{datetime.now().strftime("%Y%m%d_%H%M%S")}.jpg')
@@ -227,7 +228,7 @@ async def verify_voices(data: Voice):
         # Create a 3-second silence file
         subprocess.run([
             'ffmpeg', '-y', '-f', 'lavfi', '-i', 'anullsrc=r=16000:cl=mono', 
-            '-t', '3', '-acodec', 'pcm_s16le', '-ar', '16000', 
+            '-t', '2', '-acodec', 'pcm_s16le', '-ar', '16000', 
             '-ac', '1', silence_path
         ], check=True, capture_output=True)
         
@@ -258,7 +259,7 @@ async def verify_voices(data: Voice):
                 max_speakers=2
             )
             
-            logging.info(f"Diarization type: {type(diarization)}")
+
             
             # Extract unique speakers from the diarization result
             speakers = set()
@@ -274,19 +275,21 @@ async def verify_voices(data: Voice):
                     first_speaker = speaker
                 last_speaker = speaker
                 
-                logging.info(f"Segment: [{segment.start:.2f} --> {segment.end:.2f}] Speaker: {speaker}")
+                print(f"Segment: [{segment.start:.2f} --> {segment.end:.2f}] Speaker: {speaker}")
             
             # Check if there's only one unique speaker
             is_same_speaker = len(speakers) == 1
-            
+            if is_same_speaker or len(speakers) >= 3:
+                first_last_match = True
+            else:
             # Alternative check: first and last segments have the same speaker
-            first_last_match = first_speaker == last_speaker if first_speaker and last_speaker else False
+                first_last_match = first_speaker == last_speaker if first_speaker and last_speaker else False
             
             logging.info(f"Detected {len(speakers)} unique speakers")
             logging.info(f"First speaker: {first_speaker}, Last speaker: {last_speaker}")
             
             result = {
-                "verified": is_same_speaker,
+                "verified": first_last_match,
                 "speakers_count": len(speakers),
                 "first_last_match": first_last_match,
                 "details": f"First speaker: {first_speaker}, Last speaker: {last_speaker}"
