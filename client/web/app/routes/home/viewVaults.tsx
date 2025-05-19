@@ -9,6 +9,8 @@ export default function ViewVaults() {
   const [passwords, setPasswords] = useState<PasswordEntry[]>([]);
   const [visiblePasswordId, setVisiblePasswordId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedPasswordForCopy, setSelectedPasswordForCopy] = useState<{text: string, type: string} | null>(null);
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -35,8 +37,57 @@ export default function ViewVaults() {
   };
 
   const copyToClipboard = (text: string, type: string) => {
-    navigator.clipboard.writeText(text);
-    toast.success(`${type} copied to clipboard`);
+    // First set the selected password for copy and show auth dialog
+    setSelectedPasswordForCopy({text, type});
+    setShowAuthDialog(true);
+  };
+
+  const handleAuthSuccess = () => {
+    // Copy to clipboard only after successful authentication
+    if (selectedPasswordForCopy) {
+      navigator.clipboard.writeText(selectedPasswordForCopy.text);
+      toast.success(`${selectedPasswordForCopy.type} copied to clipboard`);
+      setSelectedPasswordForCopy(null);
+    }
+    setShowAuthDialog(false);
+  };
+
+  const handleAuthCancel = () => {
+    toast.error("Authentication cancelled");
+    setSelectedPasswordForCopy(null);
+    setShowAuthDialog(false);
+  };
+
+  // Add implementation for authentication dialog 
+  // Similar to the extension's BiometricAuth component
+  const AuthenticationDialog = () => {
+    if (!showAuthDialog) return null;
+    
+    return (
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div className="bg-white p-6 rounded-xl shadow-xl max-w-md w-full">
+          <h3 className="text-xl font-semibold mb-4">Authentication Required</h3>
+          <p className="text-gray-600 mb-6">
+            Please authenticate to copy sensitive information to clipboard
+          </p>
+          <div className="flex justify-end gap-4">
+            <button 
+              onClick={handleAuthCancel}
+              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            {/* This should be replaced with actual biometric authentication */}
+            <button 
+              onClick={handleAuthSuccess}
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+            >
+              Authenticate
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   const handleDelete = async (id: string) => {
@@ -204,6 +255,8 @@ export default function ViewVaults() {
           </div>
         </div>
       )}
+      {/* Add the authentication dialog */}
+      <AuthenticationDialog />
     </div>
   );
 }

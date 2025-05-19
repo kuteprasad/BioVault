@@ -42,6 +42,7 @@ const Home: FC = () => {
   // Add new state after other states
   const [showBiometricAuth, setShowBiometricAuth] = useState(false);
   const [bioAuthResponse, setBioAuthResponse] = useState(false);
+  const [authAction, setAuthAction] = useState<'fill'|'copy'>('fill');
   const [error, setError] = useState<string | null>(null);
 
   const showError = (message: string) => {
@@ -112,41 +113,70 @@ const Home: FC = () => {
     chrome.tabs.create({ url });
   };
 
-  const copyToClipboard = (password: PasswordEntry) => {
-    navigator.clipboard.writeText(password.passwordEncrypted);
-    setCopiedId(password._id);
-    setTimeout(() => setCopiedId(null), 2000);
-  };
-
+  // Add the handleFillPassword implementation
   const handleFillPassword = (password: PasswordEntry) => {
+    // Get the current active tab
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (tabs[0]?.id) {
-        chrome.tabs.sendMessage(
-          tabs[0].id,
-          {
-            type: "FILL_FORM",
-            data: {
-              username: password.username,
-              password: password.passwordEncrypted,
-            },
-          },
-          (response) => {
-            console.log("DEBUG: Fill form response:", response);
-          }
-        );
+      const activeTab = tabs[0];
+      if (!activeTab?.id) {
+        showError("No active tab found to fill password");
+        return;
       }
+
+      // Send message to content script to fill the form
+      chrome.tabs.sendMessage(
+        activeTab.id,
+        {
+          type: "FILL_FORM",
+          data: {
+            username: password.username,
+            password: password.passwordEncrypted
+          }
+        },
+        (response) => {
+          if (chrome.runtime.lastError) {
+            console.error("Error sending message:", chrome.runtime.lastError);
+            showError("Failed to fill password");
+            return;
+          }
+
+          if (response?.success) {
+            console.log("Password filled successfully");
+            // Show a success message or visual feedback
+            toast.success("Password filled");
+          } else {
+            console.error("Failed to fill password:", response?.error);
+            showError(response?.error || "Failed to fill password");
+          }
+        }
+      );
     });
   };
 
-  const handleAuthBeforeFill = async (password: PasswordEntry) => {
-    if (!bioAuthResponse) {
-      console.log("Initiating auth before fill for:", password.site);
-      setSelectedPassword(password);
-      setShowBiometricAuth(true);
+  const copyToClipboard = (password: PasswordEntry) => {
+    // Only copy if authentication was successful
+    if (bioAuthResponse) {
+      navigator.clipboard.writeText(password.passwordEncrypted);
+      setCopiedId(password._id);
+      setTimeout(() => setCopiedId(null), 2000);
+      setBioAuthResponse(false); // Reset the auth status after using it
     } else {
-      console.log("Auth response received. Proceeding with fill.", password);
-      handleFillPassword(password);
+      showError("Authentication required to copy password");
     }
+  };
+
+  const handleAuthBeforeCopy = (password: PasswordEntry) => {
+    console.log("Initiating auth before copy for:", password.site);
+    setSelectedPassword(password);
+    setAuthAction('copy');
+    setShowBiometricAuth(true);
+  };
+
+  const handleAuthBeforeFill = async (password: PasswordEntry) => {
+    console.log("Initiating auth before fill for:", password.site);
+    setSelectedPassword(password);
+    setAuthAction('fill');
+    setShowBiometricAuth(true);
   };
 
   const handlePasswordOptionChange = (key: keyof PasswordOptions) => {
@@ -175,29 +205,40 @@ const Home: FC = () => {
   };
 
   const handleBiometricSuccess = async (data: { blob: Blob; type: string }) => {
-    setBioAuthResponse(false);
+    // Don't reset bio auth response until after verification
     const formData = new FormData();
     formData.append("biometricData", data.blob);
     formData.append("type", data.type);
     
+    try {
+      const response = await matchBiometricData(formData);
+      console.log("DEBUG: Match biometric response:", response);
 
-    const response = await matchBiometricData(formData);
-
-    console.log("DEBUG: Match biodfsdfsdfdmetric response:", response);
-
-    if (!response.verified) {
-      showError("Biometric authentication failed"); // Show error when verification fails
+      if (response.verified) {
+        // Set auth response to true for actions that need it
+        setBioAuthResponse(true);
+        
+        // Perform the requested action
+        if (authAction === 'fill') {
+          // Now we have implemented handleFillPassword, we can call it directly
+          handleFillPassword(selectedPassword);
+        } else if (authAction === 'copy') {
+          copyToClipboard(selectedPassword);
+        }
+        
+        // Return to password list view after a short delay
+        setTimeout(() => {
+          setShowBiometricAuth(false);
+        }, 500); // Short delay to allow user to see success state
+      } else {
+        setError("Biometric authentication failed");
+        setBioAuthResponse(false);
+      }
+    } catch (error) {
+      console.error("Error during biometric verification:", error);
+      setError("Authentication error. Please try again.");
+      setBioAuthResponse(false);
     }
-
-    setBioAuthResponse(response.verified);
-
-    if (response.verified) {
-      handleFillPassword(selectedPassword);
-    } else {
-      setError("Biometric authentication failed"); // Show error message
-    }
-
-    setShowBiometricAuth(false);
   };
 
 
@@ -306,7 +347,7 @@ const Home: FC = () => {
         </div>
 
         {/* Search Bar */}
-        {!showPasswordGenerator && (
+        {!showPasswordGenerator && !showBiometricAuth && (
           <div
             className="mt-3 overflow-hidden"
             style={{
@@ -421,29 +462,50 @@ const Home: FC = () => {
           </div>
         )}
 
-        {/* Biometric Auth */}
-        <BiometricAuth
-          showBiometricAuth={showBiometricAuth}
-          setShowBiometricAuth={setShowBiometricAuth}
-          onSuccess={handleBiometricSuccess}
-          onError={handleBiometricFailure}
-          bioAuthendicated={bioAuthResponse}
-        />
+        {/* Biometric Auth - Modified to be more prominent when active */}
+        {showBiometricAuth && (
+          <div className="mt-3 flex justify-center items-center py-8">
+            <div className="text-center">
+              <div className="flex justify-center mb-4">
+                <button 
+                  onClick={() => setShowBiometricAuth(false)}
+                  className="absolute top-12 left-2 m-3 p-2 rounded-lg bg-purple-50 hover:bg-purple-100 transition-all duration-300 flex items-center gap-1"
+                  title="Back to passwords"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-700">
+                    <path d="M19 12H5M12 19l-7-7 7-7"></path>
+                  </svg>
+                </button>
+                <h3 className="text-lg font-semibold text-purple-800">Biometric Authentication</h3>
+              </div>
+              <p className="text-sm text-gray-600 mb-6">Please authenticate to access your passwords</p>
+              <BiometricAuth
+                showBiometricAuth={showBiometricAuth}
+                setShowBiometricAuth={setShowBiometricAuth}
+                onSuccess={handleBiometricSuccess}
+                onError={handleBiometricFailure}
+                bioAuthendicated={bioAuthResponse}
+              />
+            </div>
+          </div>
+        )}
 
-        {/* Generate Password Button */}
-        <GeneratePassword
-          showPasswordGenerator={showPasswordGenerator}
-          setShowPasswordGenerator={setShowPasswordGenerator}
-          passwordLength={passwordLength}
-          setPasswordLength={setPasswordLength}
-          generatedPassword={generatedPassword}
-          passwordOptions={passwordOptions}
-          handlePasswordOptionChange={handlePasswordOptionChange}
-          generatePassword={generatePassword}
-        />
+        {/* Generate Password Button - Only show when not authenticating */}
+        {!showBiometricAuth && (
+          <GeneratePassword
+            showPasswordGenerator={showPasswordGenerator}
+            setShowPasswordGenerator={setShowPasswordGenerator}
+            passwordLength={passwordLength}
+            setPasswordLength={setPasswordLength}
+            generatedPassword={generatedPassword}
+            passwordOptions={passwordOptions}
+            handlePasswordOptionChange={handlePasswordOptionChange}
+            generatePassword={generatePassword}
+          />
+        )}
 
-        {/* Quick Actions */}
-        {!showPasswordGenerator && (
+        {/* Quick Actions - Only show when not authenticating and not generating password */}
+        {!showPasswordGenerator && !showBiometricAuth && (
           <div className="mt-3">
             <button
               onClick={handelImportPassClick}
